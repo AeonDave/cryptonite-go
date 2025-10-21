@@ -36,25 +36,29 @@ Goal: provide clear, reproducible, and easily testable implementations of contem
 
 ### Hashing
 
-| Algorithm    | Streaming constructor | Single-shot helper(s)                     | Output                |
-|--------------|-----------------------|-------------------------------------------|-----------------------|
-| SHA3-224     | `sha3.Newsha3224()`   | `sha3.Newsha3224Hasher()` / `sha3.Sum224` | 224-bit (28 B) digest |
-| SHA3-256     | `sha3.Newsha3256()`   | `sha3.Newsha3256Hasher()` / `sha3.Sum256` | 256-bit (32 B) digest |
-| SHA3-384     | `sha3.Newsha3384()`   | `sha3.Newsha3384Hasher()` / `sha3.Sum384` | 384-bit (48 B) digest |
-| SHA3-512     | `sha3.Newsha3512()`   | `sha3.Newsha3512Hasher()` / `sha3.Sum512` | 512-bit (64 B) digest |
-| BLAKE2b      | `hash.NewBlake2bBuilder()` | `hash.NewBlake2bHasher()` / `hash.NewBlake2b` | Configurable 1–64 B digest, optional keyed mode |
-| BLAKE2s      | `hash.NewBlake2sBuilder()` | `hash.NewBlake2sHasher()` / `hash.NewBlake2s` | Configurable 1–32 B digest, optional keyed mode |
-| Xoodyak Hash | `xoodyak.New()`       | `xoodyak.NewHasher()` / `xoodyak.Sum`     | 32 B digest           |
+Every hashing entry point lives under the `hash` package so callers can rely on the uniform `hash.Hasher` interface or the Go `hash.Hash` type without importing algorithm-specific subpackages.
+
+| Algorithm    | Streaming constructor             | Single-shot helper(s)                                    | Notes |
+|--------------|-----------------------------------|----------------------------------------------------------|-------|
+| SHA3-224     | `hash.NewSHA3224()`               | `hash.NewSHA3224Hasher()` / `hash.Sum224`                | 224-bit (28 B) digest |
+| SHA3-256     | `hash.NewSHA3256()`               | `hash.NewSHA3256Hasher()` / `hash.Sum256`                | 256-bit (32 B) digest |
+| SHA3-384     | `hash.NewSHA3384()`               | `hash.NewSHA3384Hasher()` / `hash.Sum384`                | 384-bit (48 B) digest |
+| SHA3-512     | `hash.NewSHA3512()`               | `hash.NewSHA3512Hasher()` / `hash.Sum512`                | 512-bit (64 B) digest |
+| BLAKE2b      | `hash.NewBlake2bBuilder()`        | `hash.NewBlake2bHasher()` / `hash.NewBlake2b()`          | Configurable 1–64 B digest, optional keyed MAC mode |
+| BLAKE2s      | `hash.NewBlake2sBuilder()`        | `hash.NewBlake2sHasher()` / `hash.NewBlake2s()`          | Configurable 1–32 B digest, optional keyed MAC mode |
+| Xoodyak Hash | `hash.NewXoodyak()`               | `hash.NewXoodyakHasher()` / `hash.SumXoodyak()`          | 32 B Cyclist hash |
 
 ### XOF
 
-| Algorithm   | Constructor           | Notes                                   |
-|-------------|-----------------------|-----------------------------------------|
-| SHAKE128        | `shake.NewSHAKE128()`         | Arbitrary-length output (FIPS 202)      |
-| SHAKE256        | `shake.NewSHAKE256()`         | Wider security margin, arbitrary output |
-| BLAKE2b XOF     | `hash.NewBlake2bXOF()`        | Supports fixed-length and streaming output |
-| BLAKE2s XOF     | `hash.NewBlake2sXOF()`        | Lightweight XOF with keyed support       |
-| Xoodyak XOF     | `xoodyak.NewXOF()`            | Cyclist extendable-output mode          |
+Constructors return the shared `hash.XOF` interface so extendable-output primitives can be swapped transparently.
+
+| Algorithm   | Constructor                | Notes |
+|-------------|----------------------------|-------|
+| SHAKE128    | `hash.NewSHAKE128()`       | Arbitrary-length output (FIPS 202) |
+| SHAKE256    | `hash.NewSHAKE256()`       | Wider security margin, arbitrary output |
+| BLAKE2b XOF | `hash.NewBlake2bXOF()`     | Supports fixed-length and streaming output |
+| BLAKE2s XOF | `hash.NewBlake2sXOF()`     | Lightweight XOF with keyed support |
+| Xoodyak XOF | `hash.NewXoodyakXOF()`     | Cyclist extendable-output mode |
 
 ### KDF
 
@@ -66,6 +70,24 @@ Goal: provide clear, reproducible, and easily testable implementations of contem
 ### MAC
 
 - HMAC-SHA256 (`mac/hmacsha256.Sum`, `mac/hmacsha256.Verify`)
+
+### Stream ciphers
+
+`stream.NewChaCha20` and `stream.NewXChaCha20` expose the shared `stream.Stream` interface (with `Reset`, `KeyStream`, and `XORKeyStream`) so applications can swap keystream generators without touching call sites.
+
+| Algorithm | Constructor                     | Key  | Nonce | Notes |
+|-----------|---------------------------------|------|-------|-------|
+| ChaCha20  | `stream.NewChaCha20()`          | 32 B | 12 B  | IETF variant with configurable counter |
+| XChaCha20 | `stream.NewXChaCha20()`         | 32 B | 24 B  | HChaCha20-derived subkeys and raw keystream |
+
+### Block ciphers
+
+Block primitives are instantiated through `block.NewAES128` / `block.NewAES256`, both returning the shared `block.Cipher` interface.
+
+| Algorithm | Constructor               | Key  | Block | Notes |
+|-----------|---------------------------|------|-------|-------|
+| AES-128   | `block.NewAES128()`       | 16 B | 16 B  | Thin wrapper over stdlib AES |
+| AES-256   | `block.NewAES256()`       | 32 B | 16 B  | Thin wrapper over stdlib AES |
 
 ### Signatures
 
@@ -149,11 +171,12 @@ package main
 
 import (
     "fmt"
-    "cryptonite-go/hash/sha3"
+
+    "cryptonite-go/hash"
 )
 
 func main() {
-    hasher := sha3.Newsha3256Hasher()
+    hasher := hash.NewSHA3256Hasher()
     digest := hasher.Hash([]byte("hello sha3"))
     fmt.Printf("%x\n", digest)
 }

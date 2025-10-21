@@ -69,7 +69,7 @@ func (b Blake2bBuilder) Sum(msg []byte) ([]byte, error) {
 
 // XOF returns an extendable-output function using the configured key and the
 // requested output length. For unknown-length output use Blake2bXOFUnknown.
-func (b Blake2bBuilder) XOF(length uint32) (*XOF, error) {
+func (b Blake2bBuilder) XOF(length uint32) (XOF, error) {
 	x, err := blake2b.NewXOF(length, b.key)
 	if err != nil {
 		return nil, err
@@ -90,7 +90,7 @@ func NewBlake2bHasher(size int, key []byte) (Hasher, error) {
 }
 
 // NewBlake2bXOF constructs a BLAKE2b extendable-output instance.
-func NewBlake2bXOF(length uint32, key []byte) (*XOF, error) {
+func NewBlake2bXOF(length uint32, key []byte) (XOF, error) {
 	x, err := blake2b.NewXOF(length, key)
 	if err != nil {
 		return nil, err
@@ -149,7 +149,7 @@ func (b Blake2sBuilder) Sum(msg []byte) ([]byte, error) {
 
 // XOF returns an extendable-output function using the configured key and the
 // requested output length. For unknown-length output use Blake2sXOFUnknown.
-func (b Blake2sBuilder) XOF(length uint32) (*XOF, error) {
+func (b Blake2sBuilder) XOF(length uint32) (XOF, error) {
 	if length != Blake2sXOFUnknown && length > math.MaxUint16 {
 		return nil, errors.New("hash: blake2s XOF length too large")
 	}
@@ -173,7 +173,7 @@ func NewBlake2sHasher(size int, key []byte) (Hasher, error) {
 }
 
 // NewBlake2sXOF constructs a BLAKE2s extendable-output instance.
-func NewBlake2sXOF(length uint32, key []byte) (*XOF, error) {
+func NewBlake2sXOF(length uint32, key []byte) (XOF, error) {
 	if length != Blake2sXOFUnknown && length > math.MaxUint16 {
 		return nil, errors.New("hash: blake2s XOF length too large")
 	}

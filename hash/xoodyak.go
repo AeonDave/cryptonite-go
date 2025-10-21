@@ -13,15 +13,15 @@ type Hash struct {
 	inst xo.Instance
 }
 
-// New returns a hash.Hash computing the 32-byte Xoodyak digest.
-func New() stdhash.Hash {
+// NewXoodyak returns a hash.Hash computing the 32-byte Xoodyak digest.
+func NewXoodyak() stdhash.Hash {
 	h := &Hash{}
 	h.Reset()
 	return h
 }
 
-// NewHasher returns a stateless helper implementing hash.Hasher for Xoodyak.
-func NewHasher() Hasher { return xoodyakHasher{} }
+// NewXoodyakHasher returns a stateless helper implementing hash.Hasher for Xoodyak.
+func NewXoodyakHasher() Hasher { return xoodyakHasher{} }
 
 func (h *Hash) Reset() {
 	_ = h.inst.Initialize(nil, nil, nil)
@@ -41,7 +41,7 @@ func (h *Hash) Sum(b []byte) []byte {
 
 // Hash computes the digest of msg without altering the streaming state.
 func (h *Hash) Hash(msg []byte) []byte {
-	d := Sum(msg)
+	d := SumXoodyak(msg)
 	out := make([]byte, DigestSize)
 	copy(out, d[:])
 	return out
@@ -50,8 +50,8 @@ func (h *Hash) Hash(msg []byte) []byte {
 func (h *Hash) Size() int      { return DigestSize }
 func (h *Hash) BlockSize() int { return xo.HashRate }
 
-// Sum returns the Xoodyak hash of msg.
-func Sum(msg []byte) [DigestSize]byte {
+// SumXoodyak returns the Xoodyak hash of msg.
+func SumXoodyak(msg []byte) [DigestSize]byte {
 	var inst xo.Instance
 	if err := inst.Initialize(nil, nil, nil); err != nil {
 		panic("xoodyak: unexpected initialize failure")
@@ -65,7 +65,7 @@ func Sum(msg []byte) [DigestSize]byte {
 type xoodyakHasher struct{}
 
 func (xoodyakHasher) Hash(msg []byte) []byte {
-	d := Sum(msg)
+	d := SumXoodyak(msg)
 	out := make([]byte, DigestSize)
 	copy(out, d[:])
 	return out
@@ -107,5 +107,5 @@ func (x *xoodyakXOF) Read(p []byte) (int, error) {
 	return len(p), nil
 }
 
-// NewXOF creates a new Xoodyak XOF instance.
-func NewXOF() *XOF { return wrapXOF(newXoodyakXOF()) }
+// NewXoodyakXOF creates a new Xoodyak extendable-output instance.
+func NewXoodyakXOF() XOF { return wrapXOF(newXoodyakXOF()) }

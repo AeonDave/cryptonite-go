@@ -70,7 +70,7 @@ func TestSHAKEXOF(t *testing.T) {
 	if len(cases) == 0 {
 		t.Fatal("no SHAKE cases parsed")
 	}
-	constructors := map[string]func() *hash.XOF{
+	constructors := map[string]func() hash.XOF{
 		"SHAKE128": hash.NewSHAKE128,
 		"SHAKE256": hash.NewSHAKE256,
 	}

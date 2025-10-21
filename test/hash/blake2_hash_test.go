@@ -314,7 +314,7 @@ func testBlake2sXOF(t *testing.T, idx int, tc blake2Case) {
 	}
 }
 
-func readXOF(t *testing.T, x *cryptohash.XOF, length int) []byte {
+func readXOF(t *testing.T, x cryptohash.XOF, length int) []byte {
 	t.Helper()
 	out := make([]byte, length)
 	offset := 0

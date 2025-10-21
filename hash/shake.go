@@ -28,9 +28,9 @@ func (x *shakeXOF) Reset() {
 	x.sponge.Init(x.rate, x.ds)
 }
 
-func newSHAKEXOF(rate int, ds byte) *XOF {
+func newSHAKEXOF(rate int, ds byte) XOF {
 	return wrapXOF(newShakeXOF(rate, ds))
 }
 
-func NewSHAKE128() *XOF { return newSHAKEXOF(168, 0x1f) }
-func NewSHAKE256() *XOF { return newSHAKEXOF(136, 0x1f) }
+func NewSHAKE128() XOF { return newSHAKEXOF(168, 0x1f) }
+func NewSHAKE256() XOF { return newSHAKEXOF(136, 0x1f) }

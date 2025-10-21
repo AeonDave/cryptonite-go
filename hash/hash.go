@@ -21,31 +21,25 @@ type xofImpl interface {
 	Read([]byte) (int, error)
 }
 
-// XOF is a generic extendable-output function wrapper that delegates to an
-// underlying implementation (Xoodyak, SHAKE, ...). The concrete behaviour is
-// selected by the constructor used to obtain the instance.
-type XOF struct {
+// XOF represents an extendable-output function backed by one of the concrete
+// primitives exposed by the hash package (SHAKE, BLAKE2X, Xoodyak, ...).
+type XOF interface {
+	Reset()
+	Write([]byte) (int, error)
+	Read([]byte) (int, error)
+}
+
+type xofWrapper struct {
 	impl xofImpl
 }
 
-func wrapXOF(impl xofImpl) *XOF {
+func wrapXOF(impl xofImpl) XOF {
 	if impl == nil {
 		panic("hash: nil XOF implementation")
 	}
-	return &XOF{impl: impl}
+	return &xofWrapper{impl: impl}
 }
 
-// Reset reinitialize the XOF to its initial state.
-func (x *XOF) Reset() {
-	x.impl.Reset()
-}
-
-// Write absorbs data into the XOF.
-func (x *XOF) Write(p []byte) (int, error) {
-	return x.impl.Write(p)
-}
-
-// Read squeezes output bytes from the XOF.
-func (x *XOF) Read(out []byte) (int, error) {
-	return x.impl.Read(out)
-}
+func (x *xofWrapper) Reset()                       { x.impl.Reset() }
+func (x *xofWrapper) Write(p []byte) (int, error)  { return x.impl.Write(p) }
+func (x *xofWrapper) Read(out []byte) (int, error) { return x.impl.Read(out) }
