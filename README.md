@@ -9,6 +9,7 @@ Goal: provide clear, reproducible, and easily testable implementations of contem
 
 - Stdlib-only: no third-party packages.
 - Uniform AEAD API via `Aead` (`Encrypt`/`Decrypt`).
+- Uniform hash API via `hash.Hasher` (`Hash`).
 - Hash/XOF helpers under `hash/xoodyak` (`New`, `NewXOF`).
 - SHA-3 hash helpers under `hash/sha3` (`Newsha3*`, `Sum*`).
 - SHAKE extendable-output functions under `hash/shake` (`NewSHAKE128`, `NewSHAKE256`).
@@ -66,6 +67,18 @@ type Aead interface {
 
 - `Encrypt` returns `ciphertext||tag` (16‑byte tag appended).
 - `Decrypt` verifies the tag in constant‑time where possible and returns the plaintext or an error.
+
+Hash helper interface in `hash/hash.go`:
+
+```go
+type Hasher interface {
+    Hash(msg []byte) []byte
+    Size() int
+}
+```
+
+- `Hash` computes the digest of the provided message using any of the available primitives.
+- `Size` reports the fixed digest length (in bytes).
 
 
 ## Examples
