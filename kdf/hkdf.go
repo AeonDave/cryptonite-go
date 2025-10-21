@@ -9,16 +9,19 @@ import (
 
 const hkdfSHA256MaxLen = 255 * sha256.Size
 
+type hkdfSHA256Deriver struct{}
+
+// NewHKDFSHA256 returns a Deriver instance that computes HKDF-SHA256 (RFC 5869).
+func NewHKDFSHA256() Deriver { return hkdfSHA256Deriver{} }
+
+// Derive derives key material of length params.Length using HKDF with SHA-256.
+func (hkdfSHA256Deriver) Derive(params DeriveParams) ([]byte, error) {
+	return hkdfSHA256(params.Secret, params.Salt, params.Info, params.Length)
+}
+
 // HKDFSHA256 derives key material of length outLen using HKDF (RFC 5869) with SHA-256.
 func HKDFSHA256(ikm, salt, info []byte, outLen int) ([]byte, error) {
-	if outLen <= 0 {
-		return nil, errors.New("hkdf: invalid output length")
-	}
-	if outLen > hkdfSHA256MaxLen {
-		return nil, errors.New("hkdf: length too large for SHA-256")
-	}
-	prk := hkdfExtract(sha256.New, salt, ikm)
-	return hkdfExpand(sha256.New, prk, info, outLen)
+	return hkdfSHA256(ikm, salt, info, outLen)
 }
 
 // HKDFSHA256Extract returns the pseudorandom key (PRK) for HKDF-SHA256.
@@ -34,6 +37,17 @@ func HKDFSHA256Expand(prk, info []byte, outLen int) ([]byte, error) {
 	if outLen > hkdfSHA256MaxLen {
 		return nil, errors.New("hkdf: length too large for SHA-256")
 	}
+	return hkdfExpand(sha256.New, prk, info, outLen)
+}
+
+func hkdfSHA256(ikm, salt, info []byte, outLen int) ([]byte, error) {
+	if outLen <= 0 {
+		return nil, errors.New("hkdf: invalid output length")
+	}
+	if outLen > hkdfSHA256MaxLen {
+		return nil, errors.New("hkdf: length too large for SHA-256")
+	}
+	prk := hkdfExtract(sha256.New, salt, ikm)
 	return hkdfExpand(sha256.New, prk, info, outLen)
 }
 

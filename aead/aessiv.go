@@ -13,6 +13,15 @@ type aesSIV struct {
 	keyLen int
 }
 
+// MultiAssociatedData exposes AES-SIV helpers that accept an arbitrary number
+// of associated data components in addition to the optional nonce. This mirrors
+// the SIV construction defined in RFC 5297 where the nonce is treated as the
+// first associated string and additional components may follow.
+type MultiAssociatedData interface {
+	EncryptWithAssociatedData(key, nonce []byte, ad [][]byte, plaintext []byte) ([]byte, error)
+	DecryptWithAssociatedData(key, nonce []byte, ad [][]byte, ciphertextAndTag []byte) ([]byte, error)
+}
+
 // NewAES128SIV returns an AES-SIV AEAD instance that expects 32-byte keys.
 // The first half of the key is used for S2V (CMAC), and the second half for CTR.
 func NewAES128SIV() Aead { return aesSIV{keyLen: 32} }
@@ -22,6 +31,34 @@ func NewAES128SIV() Aead { return aesSIV{keyLen: 32} }
 func NewAES256SIV() Aead { return aesSIV{keyLen: 64} }
 
 func (a aesSIV) Encrypt(key, nonce, ad, plaintext []byte) ([]byte, error) {
+	var adList [][]byte
+	if ad != nil {
+		adList = append(adList, ad)
+	}
+	return a.encryptWithAssociatedData(key, nonce, adList, plaintext)
+}
+
+func (a aesSIV) Decrypt(key, nonce, ad, ciphertextAndTag []byte) ([]byte, error) {
+	var adList [][]byte
+	if ad != nil {
+		adList = append(adList, ad)
+	}
+	return a.decryptWithAssociatedData(key, nonce, adList, ciphertextAndTag)
+}
+
+// EncryptWithAssociatedData accepts an arbitrary number of associated data
+// components. The nonce, when provided, is treated as the first component per
+// RFC 5297.
+func (a aesSIV) EncryptWithAssociatedData(key, nonce []byte, ad [][]byte, plaintext []byte) ([]byte, error) {
+	return a.encryptWithAssociatedData(key, nonce, ad, plaintext)
+}
+
+// DecryptWithAssociatedData mirrors EncryptWithAssociatedData for decryption.
+func (a aesSIV) DecryptWithAssociatedData(key, nonce []byte, ad [][]byte, ciphertextAndTag []byte) ([]byte, error) {
+	return a.decryptWithAssociatedData(key, nonce, ad, ciphertextAndTag)
+}
+
+func (a aesSIV) encryptWithAssociatedData(key, nonce []byte, ad [][]byte, plaintext []byte) ([]byte, error) {
 	if len(key) != a.keyLen {
 		return nil, errors.New("aessiv: invalid key size")
 	}
@@ -47,7 +84,7 @@ func (a aesSIV) Encrypt(key, nonce, ad, plaintext []byte) ([]byte, error) {
 	return result, nil
 }
 
-func (a aesSIV) Decrypt(key, nonce, ad, ciphertextAndTag []byte) ([]byte, error) {
+func (a aesSIV) decryptWithAssociatedData(key, nonce []byte, ad [][]byte, ciphertextAndTag []byte) ([]byte, error) {
 	if len(key) != a.keyLen {
 		return nil, errors.New("aessiv: invalid key size")
 	}
@@ -81,13 +118,13 @@ func (a aesSIV) Decrypt(key, nonce, ad, ciphertextAndTag []byte) ([]byte, error)
 	return plaintext, nil
 }
 
-func computeS2V(macKey, nonce, ad, plaintext []byte) ([aesSIVTagSize]byte, error) {
+func computeS2V(macKey, nonce []byte, ad [][]byte, plaintext []byte) ([aesSIVTagSize]byte, error) {
 	var adList [][]byte
+	if len(ad) > 0 {
+		adList = append(adList, ad...)
+	}
 	if nonce != nil {
 		adList = append(adList, nonce)
-	}
-	if ad != nil {
-		adList = append(adList, ad)
 	}
 	return s2v(macKey, adList, plaintext)
 }
@@ -173,29 +210,14 @@ func (c *cmacState) sum(msg []byte) [aesSIVTagSize]byte {
 }
 
 func (c *cmacState) sumWithLastMask(msg []byte, mask [aesSIVTagSize]byte) [aesSIVTagSize]byte {
-	var state [aesSIVTagSize]byte
-	n := len(msg)
-	if n < aesSIVTagSize {
+	if len(msg) < aesSIVTagSize {
 		return c.sum(msg)
 	}
-	blocks := (n + aesSIVTagSize - 1) / aesSIVTagSize
-	for i := 0; i < blocks-1; i++ {
-		offset := i * aesSIVTagSize
-		for j := 0; j < aesSIVTagSize; j++ {
-			state[j] ^= msg[offset+j]
-		}
-		c.block.Encrypt(state[:], state[:])
-	}
-	offset := n - aesSIVTagSize
-	var last [aesSIVTagSize]byte
-	copy(last[:], msg[offset:])
-	xorBytes(last[:], mask[:])
-	xorBytes(last[:], c.k1[:])
-	for i := 0; i < aesSIVTagSize; i++ {
-		state[i] ^= last[i]
-	}
-	c.block.Encrypt(state[:], state[:])
-	return state
+	buf := make([]byte, len(msg))
+	copy(buf, msg)
+	offset := len(buf) - aesSIVTagSize
+	xorBytes(buf[offset:], mask[:])
+	return c.sum(buf)
 }
 
 func dblBlock16(in [aesSIVTagSize]byte) [aesSIVTagSize]byte {

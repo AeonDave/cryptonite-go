@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"cryptonite-go/aead"
+	testutil "cryptonite-go/test/internal/testutil"
 )
 
 //go:embed testdata/deoxysii_kat.json
@@ -31,11 +32,11 @@ func TestDeoxysII_KAT(t *testing.T) {
 	}
 	cipher := aead.NewDeoxysII128()
 	for idx, vec := range vectors {
-		key := mustHex(t, vec.Key)
-		nonce := mustHex(t, vec.Nonce)
-		ad := decodeOptionalHex(t, vec.AssociatedData)
-		msg := decodeOptionalHex(t, vec.Message)
-		sealed := mustHex(t, vec.Sealed)
+		key := testutil.MustHex(t, vec.Key)
+		nonce := testutil.MustHex(t, vec.Nonce)
+		ad := testutil.OptionalHex(t, vec.AssociatedData)
+		msg := testutil.OptionalHex(t, vec.Message)
+		sealed := testutil.MustHex(t, vec.Sealed)
 
 		got, err := cipher.Encrypt(key, nonce, ad, msg)
 		if err != nil {
@@ -52,14 +53,6 @@ func TestDeoxysII_KAT(t *testing.T) {
 			t.Fatalf("decrypt mismatch case %d (%s):\n got %x\nwant %x", idx+1, vec.Name, dec, msg)
 		}
 	}
-}
-
-func decodeOptionalHex(t *testing.T, s *string) []byte {
-	t.Helper()
-	if s == nil {
-		return nil
-	}
-	return mustHex(t, *s)
 }
 
 func TestDeoxysII_InvalidSizes(t *testing.T) {
