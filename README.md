@@ -50,15 +50,15 @@ Every hashing entry point lives under the `hash` package so callers can rely on 
 
 ### XOF
 
-Constructors return the shared `hash.XOF` interface so extendable-output primitives can be swapped transparently.
+Constructors live under the dedicated `xof` package and return the shared `xof.XOF` interface so extendable-output primitives can be swapped transparently.
 
 | Algorithm   | Constructor                | Notes |
 |-------------|----------------------------|-------|
-| SHAKE128    | `hash.NewSHAKE128()`       | Arbitrary-length output (FIPS 202) |
-| SHAKE256    | `hash.NewSHAKE256()`       | Wider security margin, arbitrary output |
-| BLAKE2b XOF | `hash.NewBlake2bXOF()`     | Supports fixed-length and streaming output |
-| BLAKE2s XOF | `hash.NewBlake2sXOF()`     | Lightweight XOF with keyed support |
-| Xoodyak XOF | `hash.NewXoodyakXOF()`     | Cyclist extendable-output mode |
+| SHAKE128    | `xof.SHAKE128()`           | Arbitrary-length output (FIPS 202) |
+| SHAKE256    | `xof.SHAKE256()`           | Wider security margin, arbitrary output |
+| BLAKE2b XOF | `xof.Blake2b()`            | Supports fixed-length and streaming output |
+| BLAKE2s XOF | `xof.Blake2s()`            | Lightweight XOF with keyed support |
+| Xoodyak XOF | `xof.Xoodyak()`            | Cyclist extendable-output mode |
 
 ### KDF
 

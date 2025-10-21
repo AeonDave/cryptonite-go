@@ -11,6 +11,7 @@ import (
 
 	cryptohash "cryptonite-go/hash"
 	testutil "cryptonite-go/test/internal/testutil"
+	"cryptonite-go/xof"
 )
 
 //go:embed testdata/blake2_kat.txt
@@ -238,7 +239,7 @@ func testBlake2bXOF(t *testing.T, idx int, tc blake2Case) {
 	}
 	length := uint32(tc.outLen)
 	if strings.EqualFold(tc.mode, "UNKNOWN") {
-		length = cryptohash.Blake2bXOFUnknown
+		length = xof.Blake2bUnknown
 	}
 	x, err := builder.XOF(length)
 	if err != nil {
@@ -259,9 +260,9 @@ func testBlake2bXOF(t *testing.T, idx int, tc blake2Case) {
 		t.Fatalf("case %d: XOF mismatch after reset", idx+1)
 	}
 	if !strings.EqualFold(tc.mode, "UNKNOWN") {
-		direct, err := cryptohash.NewBlake2bXOF(uint32(tc.outLen), tc.key)
+		direct, err := xof.Blake2b(uint32(tc.outLen), tc.key)
 		if err != nil {
-			t.Fatalf("case %d: NewBlake2bXOF failed: %v", idx+1, err)
+			t.Fatalf("case %d: xof.Blake2b failed: %v", idx+1, err)
 		}
 		if _, err := direct.Write(tc.msg); err != nil {
 			t.Fatalf("case %d: direct XOF write failed: %v", idx+1, err)
@@ -280,7 +281,7 @@ func testBlake2sXOF(t *testing.T, idx int, tc blake2Case) {
 	}
 	length := uint32(tc.outLen)
 	if strings.EqualFold(tc.mode, "UNKNOWN") {
-		length = cryptohash.Blake2sXOFUnknown
+		length = xof.Blake2sUnknown
 	}
 	x, err := builder.XOF(length)
 	if err != nil {
@@ -301,9 +302,9 @@ func testBlake2sXOF(t *testing.T, idx int, tc blake2Case) {
 		t.Fatalf("case %d: XOF mismatch after reset", idx+1)
 	}
 	if !strings.EqualFold(tc.mode, "UNKNOWN") {
-		direct, err := cryptohash.NewBlake2sXOF(uint32(tc.outLen), tc.key)
+		direct, err := xof.Blake2s(uint32(tc.outLen), tc.key)
 		if err != nil {
-			t.Fatalf("case %d: NewBlake2sXOF failed: %v", idx+1, err)
+			t.Fatalf("case %d: xof.Blake2s failed: %v", idx+1, err)
 		}
 		if _, err := direct.Write(tc.msg); err != nil {
 			t.Fatalf("case %d: direct XOF write failed: %v", idx+1, err)
@@ -314,7 +315,7 @@ func testBlake2sXOF(t *testing.T, idx int, tc blake2Case) {
 	}
 }
 
-func readXOF(t *testing.T, x cryptohash.XOF, length int) []byte {
+func readXOF(t *testing.T, x xof.XOF, length int) []byte {
 	t.Helper()
 	out := make([]byte, length)
 	offset := 0

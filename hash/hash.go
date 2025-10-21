@@ -14,32 +14,3 @@ type Hasher interface {
 	Hash(msg []byte) []byte
 	Size() int
 }
-
-type xofImpl interface {
-	Reset()
-	Write([]byte) (int, error)
-	Read([]byte) (int, error)
-}
-
-// XOF represents an extendable-output function backed by one of the concrete
-// primitives exposed by the hash package (SHAKE, BLAKE2X, Xoodyak, ...).
-type XOF interface {
-	Reset()
-	Write([]byte) (int, error)
-	Read([]byte) (int, error)
-}
-
-type xofWrapper struct {
-	impl xofImpl
-}
-
-func wrapXOF(impl xofImpl) XOF {
-	if impl == nil {
-		panic("hash: nil XOF implementation")
-	}
-	return &xofWrapper{impl: impl}
-}
-
-func (x *xofWrapper) Reset()                       { x.impl.Reset() }
-func (x *xofWrapper) Write(p []byte) (int, error)  { return x.impl.Write(p) }
-func (x *xofWrapper) Read(out []byte) (int, error) { return x.impl.Read(out) }
