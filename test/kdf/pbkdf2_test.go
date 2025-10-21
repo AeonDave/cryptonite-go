@@ -80,8 +80,34 @@ func TestPBKDF2_KAT(t *testing.T) {
 		switch tc.algo {
 		case "SHA1":
 			dk, err = kdf.PBKDF2SHA1(tc.password, tc.salt, tc.iterations, tc.dkLen)
+			if err == nil {
+				buf := make([]byte, tc.dkLen)
+				filled, errInto := kdf.PBKDF2SHA1Into(tc.password, tc.salt, tc.iterations, buf)
+				if errInto != nil {
+					t.Fatalf("count %d: PBKDF2SHA1Into error: %v", tc.count, errInto)
+				}
+				if &buf[0] != &filled[0] {
+					t.Fatalf("count %d: PBKDF2SHA1Into did not reuse buffer", tc.count)
+				}
+				if !bytes.Equal(filled, dk) {
+					t.Fatalf("count %d: PBKDF2SHA1Into mismatch", tc.count)
+				}
+			}
 		case "SHA256":
 			dk, err = kdf.PBKDF2SHA256(tc.password, tc.salt, tc.iterations, tc.dkLen)
+			if err == nil {
+				buf := make([]byte, tc.dkLen)
+				filled, errInto := kdf.PBKDF2SHA256Into(tc.password, tc.salt, tc.iterations, buf)
+				if errInto != nil {
+					t.Fatalf("count %d: PBKDF2SHA256Into error: %v", tc.count, errInto)
+				}
+				if &buf[0] != &filled[0] {
+					t.Fatalf("count %d: PBKDF2SHA256Into did not reuse buffer", tc.count)
+				}
+				if !bytes.Equal(filled, dk) {
+					t.Fatalf("count %d: PBKDF2SHA256Into mismatch", tc.count)
+				}
+			}
 		default:
 			t.Fatalf("count %d: unsupported algo %q", tc.count, tc.algo)
 		}
@@ -108,5 +134,22 @@ func TestPBKDF2Interface(t *testing.T) {
 	}
 	if len(dk) != params.Length {
 		t.Fatalf("unexpected key length: got %d want %d", len(dk), params.Length)
+	}
+}
+
+func TestPBKDF2CheckParams(t *testing.T) {
+	params := kdf.DeriveParams{Salt: []byte("salt"), Iterations: 1000, Length: 16}
+	if err := kdf.CheckParams(params, 500, 4); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := kdf.CheckParams(params, 2000, 4); err == nil {
+		t.Fatal("expected iterations error")
+	}
+	if err := kdf.CheckParams(params, 1000, 8); err == nil {
+		t.Fatal("expected salt length error")
+	}
+	params.Length = 0
+	if err := kdf.CheckParams(params, 500, 1); err == nil {
+		t.Fatal("expected length error")
 	}
 }

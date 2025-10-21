@@ -42,20 +42,30 @@ Goal: provide clear, reproducible, and easily testable implementations of contem
 | SHA3-256     | `sha3.Newsha3256()`   | `sha3.Newsha3256Hasher()` / `sha3.Sum256` | 256-bit (32 B) digest |
 | SHA3-384     | `sha3.Newsha3384()`   | `sha3.Newsha3384Hasher()` / `sha3.Sum384` | 384-bit (48 B) digest |
 | SHA3-512     | `sha3.Newsha3512()`   | `sha3.Newsha3512Hasher()` / `sha3.Sum512` | 512-bit (64 B) digest |
+| BLAKE2b      | `hash.NewBlake2bBuilder()` | `hash.NewBlake2bHasher()` / `hash.NewBlake2b` | Configurable 1–64 B digest, optional keyed mode |
+| BLAKE2s      | `hash.NewBlake2sBuilder()` | `hash.NewBlake2sHasher()` / `hash.NewBlake2s` | Configurable 1–32 B digest, optional keyed mode |
 | Xoodyak Hash | `xoodyak.New()`       | `xoodyak.NewHasher()` / `xoodyak.Sum`     | 32 B digest           |
 
 ### XOF
 
 | Algorithm   | Constructor           | Notes                                   |
 |-------------|-----------------------|-----------------------------------------|
-| SHAKE128    | `shake.NewSHAKE128()` | Arbitrary-length output (FIPS 202)      |
-| SHAKE256    | `shake.NewSHAKE256()` | Wider security margin, arbitrary output |
-| Xoodyak XOF | `xoodyak.NewXOF()`    | Cyclist extendable-output mode          |
+| SHAKE128        | `shake.NewSHAKE128()`         | Arbitrary-length output (FIPS 202)      |
+| SHAKE256        | `shake.NewSHAKE256()`         | Wider security margin, arbitrary output |
+| BLAKE2b XOF     | `hash.NewBlake2bXOF()`        | Supports fixed-length and streaming output |
+| BLAKE2s XOF     | `hash.NewBlake2sXOF()`        | Lightweight XOF with keyed support       |
+| Xoodyak XOF     | `xoodyak.NewXOF()`            | Cyclist extendable-output mode          |
 
 ### KDF
 
 - HKDF-SHA256 (`kdf.HKDFSHA256`, `kdf.HKDFSHA256Extract`, `kdf.HKDFSHA256Expand`)
-- PBKDF2-HMAC-SHA1 / PBKDF2-HMAC-SHA256 (`kdf.PBKDF2SHA1`, `kdf.PBKDF2SHA256`)
+- Generic HKDF helpers (`kdf.HKDF`, `kdf.HKDFExtractWith`, `kdf.HKDFExpandWith`, `kdf.NewHKDF`)
+- HKDF-BLAKE2b (`kdf.HKDFBlake2b`, `kdf.NewHKDFBlake2b`)
+- PBKDF2-HMAC-SHA1 / PBKDF2-HMAC-SHA256 (`kdf.PBKDF2SHA1`, `kdf.PBKDF2SHA256`, `kdf.PBKDF2SHA1Into`, `kdf.PBKDF2SHA256Into`, `kdf.CheckParams`)
+
+### MAC
+
+- HMAC-SHA256 (`mac/hmacsha256.Sum`, `mac/hmacsha256.Verify`)
 
 ### Signatures
 
