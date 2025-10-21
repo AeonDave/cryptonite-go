@@ -2,29 +2,29 @@ package ecdh_test
 
 import (
 	"bytes"
-	p256 "cryptonite-go/ecdh/p256"
+	p384 "cryptonite-go/ecdh/p384"
 	"cryptonite-go/test/internal/testutil"
 	"testing"
 )
 
-func TestP256KnownVector(t *testing.T) {
-	privBytes := testutil.MustHex(t, "7D7DC5F71EB29DDAF80D6214632EEAE03D9058AF1FB6D22ED80BADB62BC1A534")
-	pubBytes := testutil.MustHex(t, "04EAD218590119E8876B29146FF89CA61770C4EDBBF97D38CE385ED281D8A6B23028AF61281FD35E2FA7002523ACC85A429CB06EE6648325389F59EDFCE1405141")
-	peerBytes := testutil.MustHex(t, "04700C48F77F56584C5CC632CA65640DB91B6BACCE3A4DF6B42CE7CC838833D287DB71E509E3FD9B060DDB20BA5C51DCC5948D46FBF640DFE0441782CAB85FA4AC")
-	secretExp := testutil.MustHex(t, "46FC62106420FF012E54A434FBDD2D25CCC5852060561E68040DD7778997BD7B")
+func TestP384KnownVector(t *testing.T) {
+	privBytes := testutil.MustHex(t, "6B9D5D9A5A5AA5ADAF676905FA5C14C3D30C232D0BAF7DFFF9F6C52FCECDB24970FF9F4A26A95E5A9DF0C6068F36B5A8")
+	pubBytes := testutil.MustHex(t, "04A5C400DC867CAF6B6A4C4151DEEA5FFF54CCCA0E2C59E1BBCDEB84886431D779BABEAF9660EFF49B023CBB935A2DE847B351598E1F14E217361BB42A87E4FEC5F9655EF721213BE59AAB1D3D9D999ABA534C4DAFDAE7FD62AD8E49FBBA02257F")
+	peerBytes := testutil.MustHex(t, "04645E4ABDA6C153BC4D5F3DE0C2B1885CCAC80D1047E134C8760B229486CCCFA7331B30AE57D9308D14C37A36754D5E13E6F9F397199E433A7F161E0886F8FC9B5BBC698FD133628B503466AAA57D4795E03546861F76E33704C73C58CCE0C65A")
+	secretExp := testutil.MustHex(t, "84899D3E0A01D2BA5AD458C240C89FADC0F85C2C32A15FAF1D325C6132AC7B2B42D31F1D5C6D4619C9C17A7C5D62B243")
 
-	priv, err := p256.NewPrivateKey(privBytes)
+	priv, err := p384.NewPrivateKey(privBytes)
 	if err != nil {
 		t.Fatalf("NewPrivateKey failed: %v", err)
 	}
 	if got := priv.PublicKey().Bytes(); !bytes.Equal(got, pubBytes) {
 		t.Fatalf("public key mismatch\n got %X\nwant %X", got, pubBytes)
 	}
-	peer, err := p256.NewPublicKey(peerBytes)
+	peer, err := p384.NewPublicKey(peerBytes)
 	if err != nil {
 		t.Fatalf("NewPublicKey failed: %v", err)
 	}
-	secret, err := p256.SharedSecret(priv, peer)
+	secret, err := p384.SharedSecret(priv, peer)
 	if err != nil {
 		t.Fatalf("SharedSecret failed: %v", err)
 	}
@@ -33,20 +33,20 @@ func TestP256KnownVector(t *testing.T) {
 	}
 }
 
-func TestP256GenerateKey(t *testing.T) {
-	privA, err := p256.GenerateKey()
+func TestP384GenerateKey(t *testing.T) {
+	privA, err := p384.GenerateKey()
 	if err != nil {
 		t.Fatalf("GenerateKey A failed: %v", err)
 	}
-	privB, err := p256.GenerateKey()
+	privB, err := p384.GenerateKey()
 	if err != nil {
 		t.Fatalf("GenerateKey B failed: %v", err)
 	}
-	secretA, err := p256.SharedSecret(privA, privB.PublicKey())
+	secretA, err := p384.SharedSecret(privA, privB.PublicKey())
 	if err != nil {
 		t.Fatalf("SharedSecret A failed: %v", err)
 	}
-	secretB, err := p256.SharedSecret(privB, privA.PublicKey())
+	secretB, err := p384.SharedSecret(privB, privA.PublicKey())
 	if err != nil {
 		t.Fatalf("SharedSecret B failed: %v", err)
 	}
@@ -55,8 +55,8 @@ func TestP256GenerateKey(t *testing.T) {
 	}
 }
 
-func TestP256Interface(t *testing.T) {
-	ke := p256.New()
+func TestP384Interface(t *testing.T) {
+	ke := p384.New()
 	priv, err := ke.GenerateKey()
 	if err != nil {
 		t.Fatalf("GenerateKey via interface failed: %v", err)

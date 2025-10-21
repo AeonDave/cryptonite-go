@@ -16,6 +16,7 @@ Goal: provide clear, reproducible, and easily testable implementations of contem
 - Consistent AEAD and hashing APIs, including single-shot helpers via `hash.Hasher`, plus reusable KDF, signature, and ECDH layers.
 - Extensive known-answer tests, spec-aligned constants (e.g. NIST FIPS 202 for SHA-3/SHAKE), and selective zeroisation of sensitive buffers.
 - Uniform ciphertext layout for AEAD constructions (`ciphertext || tag`) and deterministic test fixtures for reproducibility.
+- AES-SIV exposes optional multi-associated-data helpers so callers can supply the full vector of strings defined by RFC 5297.
 
 
 ## Supported algorithms
@@ -30,7 +31,7 @@ Goal: provide clear, reproducible, and easily testable implementations of contem
 | XChaCha20-Poly1305 | `aead.NewXChaCha20Poly1305()`                  | 32 B        | 24 B                | 16 B | Derives nonce via HChaCha20    |
 | AES-GCM            | `aead.NewAESGCM()`                             | 16/24/32 B  | 12 B                | 16 B | AES-NI optional                |
 | AES-GCM-SIV        | `aead.NewAesGcmSiv()`                          | 16/32 B     | 12 B                | 16 B | Nonce misuse resistant         |
-| AES-SIV (128/256)  | `aead.NewAES128SIV()`<br>`aead.NewAES256SIV()` | 32 B / 64 B | Deterministic (AAD) | 16 B | Deterministic SIV construction |
+| AES-SIV (128/256)  | `aead.NewAES128SIV()`<br>`aead.NewAES256SIV()` | 32 B / 64 B | Deterministic (AAD) | 16 B | Deterministic SIV construction; optional multi-AD support via `aead.MultiAssociatedData` |
 | Deoxys-II-256-128  | `aead.NewDeoxysII128()`                        | 32 B        | 15 B                | 16 B | NIST LwC finalist              |
 
 ### Hashing
@@ -58,11 +59,14 @@ Goal: provide clear, reproducible, and easily testable implementations of contem
 
 ### Signatures
 
-- Ed25519 wrappers (`sig/ed25519`): key generation, deterministic keys, sign/verify
+- EdDSA on Curve25519 (`sig/x25519`): deterministic seeds, sign/verify helpers, and top-level aliases under `sig`
+- ECDSA P-256 (`sig/p256`): scalar import/export, ASN.1 helpers, deterministic KAT coverage
 
 ### Key exchange
 
-- ECDH P-256 wrappers (`ecdh/p256`): deterministic/private key helpers and shared-secret computation
+- X25519 Diffie-Hellman (`ecdh/x25519`): RFC 7748 scalar helpers and shared-secret computation
+- ECDH P-256 (`ecdh/p256`): deterministic/private key helpers and shared-secret computation
+- ECDH P-384 (`ecdh/p384`): high-strength NIST curve support with deterministic testing vectors
 
 
 ## Requirements
@@ -151,7 +155,7 @@ func main() {
 - All tests: `go test ./...`
 - With race detector: `go test -race ./...`
 
-Tests include KAT suites for ASCON, Xoodyak, and ChaCha20‑Poly1305, plus tamper checks on tags and ciphertext.
+Tests include KAT suites for ASCON, Xoodyak, ChaCha20‑Poly1305, AES-GCM-SIV, and AES-SIV (RFC 5297), plus tamper checks on tags and ciphertext.
 
 
 ## Design principles

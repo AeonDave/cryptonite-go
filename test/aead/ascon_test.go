@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"cryptonite-go/aead"
+	testutil "cryptonite-go/test/internal/testutil"
 
 	_ "embed"
 )
@@ -42,11 +43,11 @@ func parseAsconKAT(t *testing.T) []asconKATCase {
 			t.Fatalf("unexpected block format around line %d", i+1)
 		}
 
-		key := mustHex(t, strings.TrimSpace(strings.TrimPrefix(keyLine, "Key =")))
-		nonce := mustHex(t, strings.TrimSpace(strings.TrimPrefix(nonceLine, "Nonce =")))
-		pt := mustHex(t, strings.TrimSpace(strings.TrimPrefix(ptLine, "PT =")))
-		ad := mustHex(t, strings.TrimSpace(strings.TrimPrefix(adLine, "AD =")))
-		ct := mustHex(t, strings.TrimSpace(strings.TrimPrefix(ctLine, "CT =")))
+		key := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(keyLine, "Key =")))
+		nonce := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(nonceLine, "Nonce =")))
+		pt := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(ptLine, "PT =")))
+		ad := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(adLine, "AD =")))
+		ct := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(ctLine, "CT =")))
 		cases = append(cases, asconKATCase{
 			key:   key,
 			nonce: nonce,
@@ -123,12 +124,12 @@ func TestAsconKnownVectors(t *testing.T) {
 	for _, vec := range asconVectors {
 		vec := vec
 		t.Run(vec.name, func(t *testing.T) {
-			key := mustHex(t, vec.key)
-			nonce := mustHex(t, vec.nonce)
-			ad := mustHex(t, vec.ad)
-			pt := mustHex(t, vec.pt)
+			key := testutil.MustHex(t, vec.key)
+			nonce := testutil.MustHex(t, vec.nonce)
+			ad := testutil.MustHex(t, vec.ad)
+			pt := testutil.MustHex(t, vec.pt)
 
-			want := mustHex(t, vec.expectedHex)
+			want := testutil.MustHex(t, vec.expectedHex)
 			got, err := cipher.Encrypt(key, nonce, ad, pt)
 			if err != nil {
 				t.Fatalf("encrypt failed: %v", err)
@@ -152,10 +153,10 @@ func TestAsconTamper(t *testing.T) {
 	cipher := aead.NewAscon128()
 
 	vec := asconVectors[3] // pt_and_ad
-	key := mustHex(t, vec.key)
-	nonce := mustHex(t, vec.nonce)
-	ad := mustHex(t, vec.ad)
-	ciphertext, err := cipher.Encrypt(key, nonce, ad, mustHex(t, vec.pt))
+	key := testutil.MustHex(t, vec.key)
+	nonce := testutil.MustHex(t, vec.nonce)
+	ad := testutil.MustHex(t, vec.ad)
+	ciphertext, err := cipher.Encrypt(key, nonce, ad, testutil.MustHex(t, vec.pt))
 	if err != nil {
 		t.Fatalf("encrypt failed: %v", err)
 	}

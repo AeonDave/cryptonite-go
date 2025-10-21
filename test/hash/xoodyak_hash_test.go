@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	cryptohash "cryptonite-go/hash"
+	testutil "cryptonite-go/test/internal/testutil"
 )
 
 //go:embed testdata/xoodyak_hash_kat.txt
@@ -37,9 +38,9 @@ func parseXoodyakHashKAT(t *testing.T) []xoodyakHashCase {
 		if !strings.HasPrefix(msgLine, "Msg =") || !strings.HasPrefix(mdLine, "MD =") || !strings.HasPrefix(xofLine, "XOF =") {
 			t.Fatalf("unexpected block labels around line %d", i+1)
 		}
-		msg := mustHex(t, strings.TrimSpace(strings.TrimPrefix(msgLine, "Msg =")))
-		md := mustHex(t, strings.TrimSpace(strings.TrimPrefix(mdLine, "MD =")))
-		xof := mustHex(t, strings.TrimSpace(strings.TrimPrefix(xofLine, "XOF =")))
+		msg := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(msgLine, "Msg =")))
+		md := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(mdLine, "MD =")))
+		xof := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(xofLine, "XOF =")))
 		cases = append(cases, xoodyakHashCase{msg: msg, md: md, xof: xof})
 		i += 4
 		if i < len(lines) && strings.TrimSpace(lines[i]) == "" {

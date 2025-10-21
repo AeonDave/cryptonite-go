@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	testutil "cryptonite-go/test/internal/testutil"
 )
 
 //go:embed testdata/shake_kat.txt
@@ -43,7 +45,7 @@ func parseSHAKEKAT(t *testing.T) []shakeCase {
 			t.Fatalf("unexpected block structure near line %d", i+1)
 		}
 		msgHex := strings.TrimSpace(strings.TrimPrefix(msgLine, "Msg ="))
-		msg := mustHex(t, msgHex)
+		msg := testutil.MustHex(t, msgHex)
 		bitLenStr := strings.TrimSpace(strings.TrimPrefix(lenLine, "Len ="))
 		bitLen, err := strconv.Atoi(bitLenStr)
 		if err != nil {
@@ -53,7 +55,7 @@ func parseSHAKEKAT(t *testing.T) []shakeCase {
 			t.Fatalf("non-byte-aligned length %d", bitLen)
 		}
 		xofHex := strings.TrimSpace(strings.TrimPrefix(xofLine, "XOF ="))
-		xof := mustHex(t, xofHex)
+		xof := testutil.MustHex(t, xofHex)
 		cases = append(cases, shakeCase{variant: variant, msg: msg, outLen: bitLen / 8, xof: xof})
 		i += 4
 		if i < len(lines) && strings.TrimSpace(lines[i]) == "" {

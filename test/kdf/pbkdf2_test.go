@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"cryptonite-go/kdf"
+	testutil "cryptonite-go/test/internal/testutil"
 )
 
 //go:embed testdata/pbkdf2_kat.txt
@@ -58,11 +59,11 @@ func parsePBKDF2(t *testing.T) []pbkdf2Case {
 		cases = append(cases, pbkdf2Case{
 			count:      count,
 			algo:       strings.ToUpper(algo),
-			password:   mustHex(t, password),
-			salt:       mustHex(t, salt),
+			password:   testutil.MustHex(t, password),
+			salt:       testutil.MustHex(t, salt),
 			iterations: iters,
 			dkLen:      dkLen,
-			expect:     mustHex(t, strings.ReplaceAll(dk, " ", "")),
+			expect:     testutil.MustHex(t, strings.ReplaceAll(dk, " ", "")),
 		})
 		i += 7
 	}
@@ -90,5 +91,22 @@ func TestPBKDF2_KAT(t *testing.T) {
 		if !bytes.Equal(dk, tc.expect) {
 			t.Fatalf("count %d: derived key mismatch", tc.count)
 		}
+	}
+}
+
+func TestPBKDF2Interface(t *testing.T) {
+	deriver := kdf.NewPBKDF2SHA256()
+	params := kdf.DeriveParams{
+		Secret:     []byte("password"),
+		Salt:       []byte("salt"),
+		Iterations: 1000,
+		Length:     32,
+	}
+	dk, err := deriver.Derive(params)
+	if err != nil {
+		t.Fatalf("Derive failed: %v", err)
+	}
+	if len(dk) != params.Length {
+		t.Fatalf("unexpected key length: got %d want %d", len(dk), params.Length)
 	}
 }

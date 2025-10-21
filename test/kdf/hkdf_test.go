@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"cryptonite-go/kdf"
+	testutil "cryptonite-go/test/internal/testutil"
 )
 
 //go:embed testdata/hkdf_sha256_kat.txt
@@ -53,11 +54,11 @@ func parseHKDF(t *testing.T) []hkdfCase {
 		}
 		cases = append(cases, hkdfCase{
 			count:       num,
-			ikm:         mustHex(t, strings.ReplaceAll(ikm, " ", "")),
-			salt:        mustHex(t, strings.ReplaceAll(salt, " ", "")),
-			info:        mustHex(t, strings.ReplaceAll(info, " ", "")),
-			prk:         mustHex(t, strings.ReplaceAll(prk, " ", "")),
-			okm:         mustHex(t, strings.ReplaceAll(okm, " ", "")),
+			ikm:         testutil.MustHex(t, strings.ReplaceAll(ikm, " ", "")),
+			salt:        testutil.MustHex(t, strings.ReplaceAll(salt, " ", "")),
+			info:        testutil.MustHex(t, strings.ReplaceAll(info, " ", "")),
+			prk:         testutil.MustHex(t, strings.ReplaceAll(prk, " ", "")),
+			okm:         testutil.MustHex(t, strings.ReplaceAll(okm, " ", "")),
 			lengthBytes: length,
 		})
 		i += 7
@@ -86,5 +87,22 @@ func TestHKDFSHA256_KAT(t *testing.T) {
 		if !bytes.Equal(expanded, tc.okm) {
 			t.Fatalf("count %d: expand result mismatch", tc.count)
 		}
+	}
+}
+
+func TestHKDFInterface(t *testing.T) {
+	deriver := kdf.NewHKDFSHA256()
+	params := kdf.DeriveParams{
+		Secret: []byte("secret"),
+		Salt:   []byte("salt"),
+		Info:   []byte("info"),
+		Length: 42,
+	}
+	out, err := deriver.Derive(params)
+	if err != nil {
+		t.Fatalf("Derive failed: %v", err)
+	}
+	if len(out) != params.Length {
+		t.Fatalf("unexpected output length: got %d want %d", len(out), params.Length)
 	}
 }

@@ -9,6 +9,23 @@ import (
 	"hash"
 )
 
+type pbkdf2SHA1Deriver struct{}
+type pbkdf2SHA256Deriver struct{}
+
+// NewPBKDF2SHA1 returns a Deriver instance backed by PBKDF2-HMAC-SHA1 (RFC 2898).
+func NewPBKDF2SHA1() Deriver { return pbkdf2SHA1Deriver{} }
+
+// NewPBKDF2SHA256 returns a Deriver instance backed by PBKDF2-HMAC-SHA256.
+func NewPBKDF2SHA256() Deriver { return pbkdf2SHA256Deriver{} }
+
+func (pbkdf2SHA1Deriver) Derive(params DeriveParams) ([]byte, error) {
+	return pbkdf2(params.Secret, params.Salt, params.Iterations, params.Length, sha1.New)
+}
+
+func (pbkdf2SHA256Deriver) Derive(params DeriveParams) ([]byte, error) {
+	return pbkdf2(params.Secret, params.Salt, params.Iterations, params.Length, sha256.New)
+}
+
 // PBKDF2SHA1 derives key material using PBKDF2-HMAC-SHA1 (RFC 2898).
 func PBKDF2SHA1(password, salt []byte, iterations, keyLen int) ([]byte, error) {
 	return pbkdf2(password, salt, iterations, keyLen, sha1.New)

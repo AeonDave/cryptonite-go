@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"cryptonite-go/aead"
+	testutil "cryptonite-go/test/internal/testutil"
 )
 
 //go:embed testdata/xoodyak_kat.txt
@@ -44,11 +45,11 @@ func parseXoodyakKAT(t *testing.T) []xoodyakKATCase {
 			t.Fatalf("unexpected block format around line %d", i+1)
 		}
 
-		key := mustHex(t, strings.TrimSpace(strings.TrimPrefix(keyLine, "Key =")))
-		nonce := mustHex(t, strings.TrimSpace(strings.TrimPrefix(nonceLine, "Nonce =")))
-		pt := mustHex(t, strings.TrimSpace(strings.TrimPrefix(ptLine, "PT =")))
-		ad := mustHex(t, strings.TrimSpace(strings.TrimPrefix(adLine, "AD =")))
-		ct := mustHex(t, strings.TrimSpace(strings.TrimPrefix(ctLine, "CT =")))
+		key := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(keyLine, "Key =")))
+		nonce := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(nonceLine, "Nonce =")))
+		pt := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(ptLine, "PT =")))
+		ad := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(adLine, "AD =")))
+		ct := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(ctLine, "CT =")))
 
 		cases = append(cases, xoodyakKATCase{
 			key:   key,

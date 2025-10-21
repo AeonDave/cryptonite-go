@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	cryptohash "cryptonite-go/hash"
+	testutil "cryptonite-go/test/internal/testutil"
 )
 
 //go:embed testdata/sha3_kat.txt
@@ -43,8 +44,8 @@ func parseSHA3KAT(t *testing.T) []sha3Case {
 		}
 		msgHex := strings.TrimSpace(strings.TrimPrefix(msgLine, "Msg ="))
 		mdHex := strings.TrimSpace(strings.TrimPrefix(mdLine, "MD ="))
-		msg := mustHex(t, msgHex)
-		md := mustHex(t, mdHex)
+		msg := testutil.MustHex(t, msgHex)
+		md := testutil.MustHex(t, mdHex)
 		cases = append(cases, sha3Case{variant: variant, msg: msg, md: md})
 		i += 3
 		if i < len(lines) && strings.TrimSpace(lines[i]) == "" {
