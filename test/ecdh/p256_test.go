@@ -2,10 +2,9 @@ package ecdh_test
 
 import (
 	"bytes"
+	"cryptonite-go/ecdh"
 	"encoding/hex"
 	"testing"
-
-	"cryptonite-go/ecdh/p256"
 )
 
 func mustDecodeHex(t *testing.T, s string) []byte {
@@ -22,18 +21,18 @@ func TestP256KnownVector(t *testing.T) {
 	peerBytes := mustDecodeHex(t, "04700C48F77F56584C5CC632CA65640DB91B6BACCE3A4DF6B42CE7CC838833D287DB71E509E3FD9B060DDB20BA5C51DCC5948D46FBF640DFE0441782CAB85FA4AC")
 	secretExp := mustDecodeHex(t, "46FC62106420FF012E54A434FBDD2D25CCC5852060561E68040DD7778997BD7B")
 
-	priv, err := p256.NewPrivateKey(privBytes)
+	priv, err := ecdh.NewPrivateKey(privBytes)
 	if err != nil {
 		t.Fatalf("NewPrivateKey failed: %v", err)
 	}
 	if got := priv.PublicKey().Bytes(); !bytes.Equal(got, pubBytes) {
 		t.Fatalf("public key mismatch\n got %X\nwant %X", got, pubBytes)
 	}
-	peer, err := p256.NewPublicKey(peerBytes)
+	peer, err := ecdh.NewPublicKey(peerBytes)
 	if err != nil {
 		t.Fatalf("NewPublicKey failed: %v", err)
 	}
-	secret, err := p256.SharedSecret(priv, peer)
+	secret, err := ecdh.SharedSecret(priv, peer)
 	if err != nil {
 		t.Fatalf("SharedSecret failed: %v", err)
 	}
@@ -43,19 +42,19 @@ func TestP256KnownVector(t *testing.T) {
 }
 
 func TestP256GenerateKey(t *testing.T) {
-	privA, err := p256.GenerateKey()
+	privA, err := ecdh.GenerateKey()
 	if err != nil {
 		t.Fatalf("GenerateKey A failed: %v", err)
 	}
-	privB, err := p256.GenerateKey()
+	privB, err := ecdh.GenerateKey()
 	if err != nil {
 		t.Fatalf("GenerateKey B failed: %v", err)
 	}
-	secretA, err := p256.SharedSecret(privA, privB.PublicKey())
+	secretA, err := ecdh.SharedSecret(privA, privB.PublicKey())
 	if err != nil {
 		t.Fatalf("SharedSecret A failed: %v", err)
 	}
-	secretB, err := p256.SharedSecret(privB, privA.PublicKey())
+	secretB, err := ecdh.SharedSecret(privB, privA.PublicKey())
 	if err != nil {
 		t.Fatalf("SharedSecret B failed: %v", err)
 	}

@@ -1,4 +1,4 @@
-package ed25519
+package sig
 
 import (
 	"crypto/ed25519"

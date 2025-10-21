@@ -1,4 +1,4 @@
-package p256
+package ecdh
 
 import (
 	"crypto/ecdh"

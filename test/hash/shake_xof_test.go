@@ -2,12 +2,11 @@ package xoodyak_test
 
 import (
 	"bytes"
+	"cryptonite-go/hash"
 	_ "embed"
 	"strconv"
 	"strings"
 	"testing"
-
-	"cryptonite-go/hash/shake"
 )
 
 //go:embed testdata/shake_kat.txt
@@ -69,9 +68,9 @@ func TestSHAKEXOF(t *testing.T) {
 	if len(cases) == 0 {
 		t.Fatal("no SHAKE cases parsed")
 	}
-	constructors := map[string]func() *shake.XOF{
-		"SHAKE128": shake.NewSHAKE128,
-		"SHAKE256": shake.NewSHAKE256,
+	constructors := map[string]func() *hash.XOF{
+		"SHAKE128": hash.NewSHAKE128,
+		"SHAKE256": hash.NewSHAKE256,
 	}
 	for idx, tc := range cases {
 		newXOF, ok := constructors[tc.variant]

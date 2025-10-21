@@ -1,5 +1,9 @@
 # Cryptonite-go
 
+[![CodeQL Advanced](https://github.com/AeonDave/cryptonite-go/actions/workflows/codeql.yml/badge.svg)](https://github.com/AeonDave/cryptonite-go/actions/workflows/codeql.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/AeonDave/cryptonite-go)](https://goreportcard.com/report/github.com/AeonDave/cryptonite-go)
+![GitHub License](https://img.shields.io/github/license/AeonDave/cryptonite-go)
+
 Minimal, dependency-free cryptography library in Go implemented using only the standard library.
 
 Goal: provide clear, reproducible, and easily testable implementations of contemporary algorithms behind small, composable interfaces without importing anything beyond Go's stdlib.
@@ -18,34 +22,34 @@ Goal: provide clear, reproducible, and easily testable implementations of contem
 
 ### AEAD
 
-| Algorithm | Constructor(s) | Key | Nonce | Tag | Notes |
-| --- | --- | --- | --- | --- | --- |
-| ASCON-128a | `aead.NewAscon128()` | 16 B | 16 B | 16 B | NIST LwC winner |
-| Xoodyak-Encrypt | `aead.NewXoodyak()` | 16 B | 16 B | 16 B | Cyclist mode |
-| ChaCha20-Poly1305 | `aead.NewChaCha20Poly1305()` | 32 B | 12 B | 16 B | RFC 8439 layout |
-| XChaCha20-Poly1305 | `aead.NewXChaCha20Poly1305()` | 32 B | 24 B | 16 B | Derives nonce via HChaCha20 |
-| AES-GCM | `aead.NewAESGCM()` | 16/24/32 B | 12 B | 16 B | AES-NI optional |
-| AES-GCM-SIV | `aead.NewAesGcmSiv()` | 16/32 B | 12 B | 16 B | Nonce misuse resistant |
-| AES-SIV (128/256) | `aead.NewAES128SIV()`<br>`aead.NewAES256SIV()` | 32 B / 64 B | Deterministic (AAD) | 16 B | Deterministic SIV construction |
-| Deoxys-II-256-128 | `aead.NewDeoxysII128()` | 32 B | 15 B | 16 B | NIST LwC finalist |
+| Algorithm          | Constructor(s)                                 | Key         | Nonce               | Tag  | Notes                          |
+|--------------------|------------------------------------------------|-------------|---------------------|------|--------------------------------|
+| ASCON-128a         | `aead.NewAscon128()`                           | 16 B        | 16 B                | 16 B | NIST LwC winner                |
+| Xoodyak-Encrypt    | `aead.NewXoodyak()`                            | 16 B        | 16 B                | 16 B | Cyclist mode                   |
+| ChaCha20-Poly1305  | `aead.NewChaCha20Poly1305()`                   | 32 B        | 12 B                | 16 B | RFC 8439 layout                |
+| XChaCha20-Poly1305 | `aead.NewXChaCha20Poly1305()`                  | 32 B        | 24 B                | 16 B | Derives nonce via HChaCha20    |
+| AES-GCM            | `aead.NewAESGCM()`                             | 16/24/32 B  | 12 B                | 16 B | AES-NI optional                |
+| AES-GCM-SIV        | `aead.NewAesGcmSiv()`                          | 16/32 B     | 12 B                | 16 B | Nonce misuse resistant         |
+| AES-SIV (128/256)  | `aead.NewAES128SIV()`<br>`aead.NewAES256SIV()` | 32 B / 64 B | Deterministic (AAD) | 16 B | Deterministic SIV construction |
+| Deoxys-II-256-128  | `aead.NewDeoxysII128()`                        | 32 B        | 15 B                | 16 B | NIST LwC finalist              |
 
 ### Hashing
 
-| Algorithm | Streaming constructor | Single-shot helper(s) | Output |
-| --- | --- | --- | --- |
-| SHA3-224 | `sha3.Newsha3224()` | `sha3.Newsha3224Hasher()` / `sha3.Sum224` | 224-bit (28 B) digest |
-| SHA3-256 | `sha3.Newsha3256()` | `sha3.Newsha3256Hasher()` / `sha3.Sum256` | 256-bit (32 B) digest |
-| SHA3-384 | `sha3.Newsha3384()` | `sha3.Newsha3384Hasher()` / `sha3.Sum384` | 384-bit (48 B) digest |
-| SHA3-512 | `sha3.Newsha3512()` | `sha3.Newsha3512Hasher()` / `sha3.Sum512` | 512-bit (64 B) digest |
-| Xoodyak Hash | `xoodyak.New()` | `xoodyak.NewHasher()` / `xoodyak.Sum` | 32 B digest |
+| Algorithm    | Streaming constructor | Single-shot helper(s)                     | Output                |
+|--------------|-----------------------|-------------------------------------------|-----------------------|
+| SHA3-224     | `sha3.Newsha3224()`   | `sha3.Newsha3224Hasher()` / `sha3.Sum224` | 224-bit (28 B) digest |
+| SHA3-256     | `sha3.Newsha3256()`   | `sha3.Newsha3256Hasher()` / `sha3.Sum256` | 256-bit (32 B) digest |
+| SHA3-384     | `sha3.Newsha3384()`   | `sha3.Newsha3384Hasher()` / `sha3.Sum384` | 384-bit (48 B) digest |
+| SHA3-512     | `sha3.Newsha3512()`   | `sha3.Newsha3512Hasher()` / `sha3.Sum512` | 512-bit (64 B) digest |
+| Xoodyak Hash | `xoodyak.New()`       | `xoodyak.NewHasher()` / `xoodyak.Sum`     | 32 B digest           |
 
 ### XOF
 
-| Algorithm | Constructor | Notes |
-| --- | --- | --- |
-| SHAKE128 | `shake.NewSHAKE128()` | Arbitrary-length output (FIPS 202) |
-| SHAKE256 | `shake.NewSHAKE256()` | Wider security margin, arbitrary output |
-| Xoodyak XOF | `xoodyak.NewXOF()` | Cyclist extendable-output mode |
+| Algorithm   | Constructor           | Notes                                   |
+|-------------|-----------------------|-----------------------------------------|
+| SHAKE128    | `shake.NewSHAKE128()` | Arbitrary-length output (FIPS 202)      |
+| SHAKE256    | `shake.NewSHAKE256()` | Wider security margin, arbitrary output |
+| Xoodyak XOF | `xoodyak.NewXOF()`    | Cyclist extendable-output mode          |
 
 ### KDF
 

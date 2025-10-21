@@ -1,9 +1,8 @@
-package sha3
+package hash
 
 import (
 	stdhash "hash"
 
-	cryptohash "cryptonite-go/hash"
 	"cryptonite-go/internal/keccak"
 )
 
@@ -83,7 +82,7 @@ func (d *digest) Hash(msg []byte) []byte { return d.params.Hash(msg) }
 func Newsha3224() stdhash.Hash { return newDigest(sha3Variant224) }
 
 // Newsha3224Hasher returns a stateless SHA3-224 helper implementing hash.Hasher.
-func Newsha3224Hasher() cryptohash.Hasher { return sha3Variant224 }
+func Newsha3224Hasher() Hasher { return sha3Variant224 }
 
 // Sum224 returns the SHA3-224 digest of the input.
 func Sum224(data []byte) [size224]byte {
@@ -96,7 +95,7 @@ func Sum224(data []byte) [size224]byte {
 func Newsha3256() stdhash.Hash { return newDigest(sha3Variant256) }
 
 // Newsha3256Hasher returns a stateless SHA3-256 helper implementing hash.Hasher.
-func Newsha3256Hasher() cryptohash.Hasher { return sha3Variant256 }
+func Newsha3256Hasher() Hasher { return sha3Variant256 }
 
 // Sum256 returns the SHA3-256 digest of the input.
 func Sum256(data []byte) [size256]byte {
@@ -109,7 +108,7 @@ func Sum256(data []byte) [size256]byte {
 func Newsha3384() stdhash.Hash { return newDigest(sha3Variant384) }
 
 // Newsha3384Hasher returns a stateless SHA3-384 helper implementing hash.Hasher.
-func Newsha3384Hasher() cryptohash.Hasher { return sha3Variant384 }
+func Newsha3384Hasher() Hasher { return sha3Variant384 }
 
 // Sum384 returns the SHA3-384 digest of the input.
 func Sum384(data []byte) [size384]byte {
@@ -122,7 +121,7 @@ func Sum384(data []byte) [size384]byte {
 func Newsha3512() stdhash.Hash { return newDigest(sha3Variant512) }
 
 // Newsha3512Hasher returns a stateless SHA3-512 helper implementing hash.Hasher.
-func Newsha3512Hasher() cryptohash.Hasher { return sha3Variant512 }
+func Newsha3512Hasher() Hasher { return sha3Variant512 }
 
 // Sum512 returns the SHA3-512 digest of the input.
 func Sum512(data []byte) [size512]byte {

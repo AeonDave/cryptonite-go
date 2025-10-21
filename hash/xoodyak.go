@@ -1,9 +1,8 @@
-package xoodyak
+package hash
 
 import (
 	stdhash "hash"
 
-	cryptohash "cryptonite-go/hash"
 	xo "cryptonite-go/internal/xoodyak"
 )
 
@@ -22,7 +21,7 @@ func New() stdhash.Hash {
 }
 
 // NewHasher returns a stateless helper implementing hash.Hasher for Xoodyak.
-func NewHasher() cryptohash.Hasher { return hasher{} }
+func NewHasher() Hasher { return xoodyakHasher{} }
 
 func (h *Hash) Reset() {
 	_ = h.inst.Initialize(nil, nil, nil)
@@ -63,53 +62,50 @@ func Sum(msg []byte) [DigestSize]byte {
 	return out
 }
 
-type hasher struct{}
+type xoodyakHasher struct{}
 
-func (hasher) Hash(msg []byte) []byte {
+func (xoodyakHasher) Hash(msg []byte) []byte {
 	d := Sum(msg)
 	out := make([]byte, DigestSize)
 	copy(out, d[:])
 	return out
 }
 
-func (hasher) Size() int { return DigestSize }
+func (xoodyakHasher) Size() int { return DigestSize }
 
-// XOF implements the Xoodyak extendable-output function.
-type XOF struct {
+type xoodyakXOF struct {
 	inst    xo.Instance
 	started bool
 }
 
-// NewXOF creates a new Xoodyak XOF instance.
-func NewXOF() *XOF {
-	var x XOF
-	_ = x.inst.Initialize(nil, nil, nil)
+func newXoodyakXOF() *xoodyakXOF {
+	var x xoodyakXOF
+	x.Reset()
 	return &x
 }
 
-// Reset clears the XOF state.
-func (x *XOF) Reset() {
+func (x *xoodyakXOF) Reset() {
 	_ = x.inst.Initialize(nil, nil, nil)
 	x.started = false
 }
 
-// Write absorbs data into the XOF.
-func (x *XOF) Write(p []byte) (int, error) {
+func (x *xoodyakXOF) Write(p []byte) (int, error) {
 	x.inst.Absorb(p)
 	return len(p), nil
 }
 
-// Read squeezes output bytes from the XOF.
-func (x *XOF) Read(p []byte) (int, error) {
+func (x *xoodyakXOF) Read(p []byte) (int, error) {
 	if len(p) == 0 {
 		return 0, nil
 	}
 	if x.started {
 		x.inst.Advance()
-		x.inst.SqueezeAny(p, 0x00)
 	} else {
-		x.inst.SqueezeAny(p, 0x00)
 		x.started = true
 	}
+	x.inst.SqueezeAny(p, 0x00)
 	return len(p), nil
 }
+
+// NewXOF creates a new Xoodyak XOF instance.
+func NewXOF() *XOF { return wrapXOF(newXoodyakXOF()) }

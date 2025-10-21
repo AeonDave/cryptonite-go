@@ -2,10 +2,9 @@ package sig_test
 
 import (
 	"bytes"
+	ed "cryptonite-go/sig"
 	"encoding/hex"
 	"testing"
-
-	ed "cryptonite-go/sig/ed25519"
 )
 
 func decodeHex(t *testing.T, s string) []byte {

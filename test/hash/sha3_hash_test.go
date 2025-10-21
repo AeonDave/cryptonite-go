@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	cryptohash "cryptonite-go/hash"
-	"cryptonite-go/hash/sha3"
 )
 
 //go:embed testdata/sha3_kat.txt
@@ -61,16 +60,16 @@ func TestSHA3KAT(t *testing.T) {
 		t.Fatal("no SHA3 cases parsed")
 	}
 	constructors := map[string]func() stdhash.Hash{
-		"SHA3-224": sha3.Newsha3224,
-		"SHA3-256": sha3.Newsha3256,
-		"SHA3-384": sha3.Newsha3384,
-		"SHA3-512": sha3.Newsha3512,
+		"SHA3-224": cryptohash.Newsha3224,
+		"SHA3-256": cryptohash.Newsha3256,
+		"SHA3-384": cryptohash.Newsha3384,
+		"SHA3-512": cryptohash.Newsha3512,
 	}
 	stateless := map[string]func() cryptohash.Hasher{
-		"SHA3-224": sha3.Newsha3224Hasher,
-		"SHA3-256": sha3.Newsha3256Hasher,
-		"SHA3-384": sha3.Newsha3384Hasher,
-		"SHA3-512": sha3.Newsha3512Hasher,
+		"SHA3-224": cryptohash.Newsha3224Hasher,
+		"SHA3-256": cryptohash.Newsha3256Hasher,
+		"SHA3-384": cryptohash.Newsha3384Hasher,
+		"SHA3-512": cryptohash.Newsha3512Hasher,
 	}
 	for idx, tc := range cases {
 		newHash, ok := constructors[tc.variant]
@@ -105,19 +104,19 @@ func TestSHA3KAT(t *testing.T) {
 
 		switch tc.variant {
 		case "SHA3-224":
-			if got := sha3.Sum224(tc.msg); !bytes.Equal(got[:], tc.md) {
+			if got := cryptohash.Sum224(tc.msg); !bytes.Equal(got[:], tc.md) {
 				t.Fatalf("Sum224 mismatch case %d", idx+1)
 			}
 		case "SHA3-256":
-			if got := sha3.Sum256(tc.msg); !bytes.Equal(got[:], tc.md) {
+			if got := cryptohash.Sum256(tc.msg); !bytes.Equal(got[:], tc.md) {
 				t.Fatalf("Sum256 mismatch case %d", idx+1)
 			}
 		case "SHA3-384":
-			if got := sha3.Sum384(tc.msg); !bytes.Equal(got[:], tc.md) {
+			if got := cryptohash.Sum384(tc.msg); !bytes.Equal(got[:], tc.md) {
 				t.Fatalf("Sum384 mismatch case %d", idx+1)
 			}
 		case "SHA3-512":
-			if got := sha3.Sum512(tc.msg); !bytes.Equal(got[:], tc.md) {
+			if got := cryptohash.Sum512(tc.msg); !bytes.Equal(got[:], tc.md) {
 				t.Fatalf("Sum512 mismatch case %d", idx+1)
 			}
 		}
