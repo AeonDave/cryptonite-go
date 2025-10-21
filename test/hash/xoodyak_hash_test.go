@@ -57,7 +57,7 @@ func TestXoodyak_Hash_XOF_KAT(t *testing.T) {
 	}
 	for idx, tc := range cases {
 		// Hash
-		h := cryptohash.New()
+		h := cryptohash.NewXoodyak()
 		if _, err := h.Write(tc.msg); err != nil {
 			t.Fatalf("hash write failed case %d: %v", idx+1, err)
 		}
@@ -65,7 +65,7 @@ func TestXoodyak_Hash_XOF_KAT(t *testing.T) {
 		if !bytes.Equal(got, tc.md) {
 			t.Fatalf("hash mismatch case %d:\n got %x\nwant %x", idx+1, got, tc.md)
 		}
-		sum := cryptohash.Sum(tc.msg)
+		sum := cryptohash.SumXoodyak(tc.msg)
 		if !bytes.Equal(sum[:], tc.md) {
 			t.Fatalf("Sum mismatch case %d:\n got %x\nwant %x", idx+1, sum, tc.md)
 		}
@@ -79,7 +79,7 @@ func TestXoodyak_Hash_XOF_KAT(t *testing.T) {
 		if got := streaming.Hash(tc.msg); !bytes.Equal(got, tc.md) {
 			t.Fatalf("streaming Hash mismatch case %d", idx+1)
 		}
-		hasher := cryptohash.NewHasher()
+		hasher := cryptohash.NewXoodyakHasher()
 		if hasher.Size() != len(tc.md) {
 			t.Fatalf("Hasher size mismatch case %d", idx+1)
 		}
@@ -87,7 +87,7 @@ func TestXoodyak_Hash_XOF_KAT(t *testing.T) {
 			t.Fatalf("Hasher digest mismatch case %d", idx+1)
 		}
 		// XOF (64 bytes)
-		x := cryptohash.NewXOF()
+		x := cryptohash.NewXoodyakXOF()
 		if _, err := x.Write(tc.msg); err != nil {
 			t.Fatalf("xof write failed case %d: %v", idx+1, err)
 		}
@@ -99,7 +99,7 @@ func TestXoodyak_Hash_XOF_KAT(t *testing.T) {
 			t.Fatalf("xof mismatch case %d:\n got %x\nwant %x", idx+1, out, tc.xof)
 		}
 		// Multiple reads should continue the stream
-		x2 := cryptohash.NewXOF()
+		x2 := cryptohash.NewXoodyakXOF()
 		_, _ = x2.Write(tc.msg)
 		outA := make([]byte, 32)
 		outB := make([]byte, len(tc.xof)-32)

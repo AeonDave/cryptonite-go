@@ -3,10 +3,12 @@ package kdf_test
 import (
 	"bytes"
 	_ "embed"
+	stdhash "hash"
 	"strconv"
 	"strings"
 	"testing"
 
+	cryptohash "cryptonite-go/hash"
 	"cryptonite-go/kdf"
 	testutil "cryptonite-go/test/internal/testutil"
 )
@@ -105,4 +107,90 @@ func TestHKDFInterface(t *testing.T) {
 	if len(out) != params.Length {
 		t.Fatalf("unexpected output length: got %d want %d", len(out), params.Length)
 	}
+}
+
+func TestHKDFGeneric(t *testing.T) {
+	ikm := []byte("ikm")
+	salt := []byte("salt")
+	info := []byte("info")
+	const outLen = 32
+
+	okm, err := kdf.HKDF(newBlake2sHash, ikm, salt, info, outLen)
+	if err != nil {
+		t.Fatalf("HKDF returned error: %v", err)
+	}
+	if len(okm) != outLen {
+		t.Fatalf("unexpected length: got %d", len(okm))
+	}
+
+	deriver := kdf.NewHKDF(newBlake2sHash)
+	params := kdf.DeriveParams{Secret: ikm, Salt: salt, Info: info, Length: outLen}
+	viaDeriver, err := deriver.Derive(params)
+	if err != nil {
+		t.Fatalf("Derive failed: %v", err)
+	}
+	if !bytes.Equal(okm, viaDeriver) {
+		t.Fatalf("Derive output mismatch")
+	}
+}
+
+func TestHKDFBlake2b(t *testing.T) {
+	ikm := []byte("BLAKE2b IKM")
+	salt := []byte("BLAKE2b salt")
+	info := []byte("ctx")
+	const outLen = 64
+
+	okm1, err := kdf.HKDFBlake2b(ikm, salt, info, outLen)
+	if err != nil {
+		t.Fatalf("HKDFBlake2b failed: %v", err)
+	}
+	okm2, err := kdf.HKDF(newBlake2bHash, ikm, salt, info, outLen)
+	if err != nil {
+		t.Fatalf("HKDF generic failed: %v", err)
+	}
+	if !bytes.Equal(okm1, okm2) {
+		t.Fatalf("HKDFBlake2b mismatch")
+	}
+
+	prk := kdf.HKDFExtractWith(newBlake2bHash, salt, ikm)
+	expanded, err := kdf.HKDFExpandWith(newBlake2bHash, prk, info, outLen)
+	if err != nil {
+		t.Fatalf("HKDFExpandWith failed: %v", err)
+	}
+	if !bytes.Equal(expanded, okm1) {
+		t.Fatalf("HKDFExpandWith mismatch")
+	}
+
+	deriver := kdf.NewHKDFBlake2b()
+	params := kdf.DeriveParams{Secret: ikm, Salt: salt, Info: info, Length: outLen}
+	viaDeriver, err := deriver.Derive(params)
+	if err != nil {
+		t.Fatalf("HKDFBlake2b deriver failed: %v", err)
+	}
+	if !bytes.Equal(viaDeriver, okm1) {
+		t.Fatalf("HKDFBlake2b deriver mismatch")
+	}
+}
+
+func TestHKDFGenericMaxLength(t *testing.T) {
+	_, err := kdf.HKDF(newBlake2sHash, []byte("ikm"), []byte("salt"), nil, 255*32+1)
+	if err == nil {
+		t.Fatalf("expected HKDF length error")
+	}
+}
+
+func newBlake2bHash() stdhash.Hash {
+	h, err := cryptohash.NewBlake2b(64, nil)
+	if err != nil {
+		panic(err)
+	}
+	return h
+}
+
+func newBlake2sHash() stdhash.Hash {
+	h, err := cryptohash.NewBlake2s(32, nil)
+	if err != nil {
+		panic(err)
+	}
+	return h
 }

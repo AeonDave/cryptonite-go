@@ -78,11 +78,11 @@ func (d *digest) BlockSize() int { return d.sponge.Rate() }
 
 func (d *digest) Hash(msg []byte) []byte { return d.params.Hash(msg) }
 
-// NewSha3224 returns a hash computing the SHA3-224 digest.
-func NewSha3224() stdhash.Hash { return newDigest(sha3Variant224) }
+// NewSHA3224 returns a hash computing the SHA3-224 digest.
+func NewSHA3224() stdhash.Hash { return newDigest(sha3Variant224) }
 
-// NewSha3224Hasher returns a stateless SHA3-224 helper implementing hash.Hasher.
-func NewSha3224Hasher() Hasher { return sha3Variant224 }
+// NewSHA3224Hasher returns a stateless SHA3-224 helper implementing hash.Hasher.
+func NewSHA3224Hasher() Hasher { return sha3Variant224 }
 
 // Sum224 returns the SHA3-224 digest of the input.
 func Sum224(data []byte) [size224]byte {
@@ -91,11 +91,11 @@ func Sum224(data []byte) [size224]byte {
 	return out
 }
 
-// NewSha3256 returns a hash computing the SHA3-256 digest.
-func NewSha3256() stdhash.Hash { return newDigest(sha3Variant256) }
+// NewSHA3256 returns a hash computing the SHA3-256 digest.
+func NewSHA3256() stdhash.Hash { return newDigest(sha3Variant256) }
 
-// NewSha3256Hasher returns a stateless SHA3-256 helper implementing hash.Hasher.
-func NewSha3256Hasher() Hasher { return sha3Variant256 }
+// NewSHA3256Hasher returns a stateless SHA3-256 helper implementing hash.Hasher.
+func NewSHA3256Hasher() Hasher { return sha3Variant256 }
 
 // Sum256 returns the SHA3-256 digest of the input.
 func Sum256(data []byte) [size256]byte {
@@ -104,11 +104,11 @@ func Sum256(data []byte) [size256]byte {
 	return out
 }
 
-// NewSha3384 returns a hash computing the SHA3-384 digest.
-func NewSha3384() stdhash.Hash { return newDigest(sha3Variant384) }
+// NewSHA3384 returns a hash computing the SHA3-384 digest.
+func NewSHA3384() stdhash.Hash { return newDigest(sha3Variant384) }
 
-// NewSha3384Hasher returns a stateless SHA3-384 helper implementing hash.Hasher.
-func NewSha3384Hasher() Hasher { return sha3Variant384 }
+// NewSHA3384Hasher returns a stateless SHA3-384 helper implementing hash.Hasher.
+func NewSHA3384Hasher() Hasher { return sha3Variant384 }
 
 // Sum384 returns the SHA3-384 digest of the input.
 func Sum384(data []byte) [size384]byte {
@@ -117,11 +117,11 @@ func Sum384(data []byte) [size384]byte {
 	return out
 }
 
-// NewSha3512 returns a hash computing the SHA3-512 digest.
-func NewSha3512() stdhash.Hash { return newDigest(sha3Variant512) }
+// NewSHA3512 returns a hash computing the SHA3-512 digest.
+func NewSHA3512() stdhash.Hash { return newDigest(sha3Variant512) }
 
-// NewSha3512Hasher returns a stateless SHA3-512 helper implementing hash.Hasher.
-func NewSha3512Hasher() Hasher { return sha3Variant512 }
+// NewSHA3512Hasher returns a stateless SHA3-512 helper implementing hash.Hasher.
+func NewSHA3512Hasher() Hasher { return sha3Variant512 }
 
 // Sum512 returns the SHA3-512 digest of the input.
 func Sum512(data []byte) [size512]byte {
