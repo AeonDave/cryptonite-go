@@ -1,4 +1,4 @@
-package hmacsha256
+package mac
 
 import (
 	"crypto/hmac"

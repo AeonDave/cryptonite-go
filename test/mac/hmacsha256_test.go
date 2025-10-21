@@ -3,10 +3,9 @@ package mac_test
 import (
 	"crypto/hmac"
 	"crypto/sha256"
+	"cryptonite-go/mac"
 	"encoding/hex"
 	"testing"
-
-	"cryptonite-go/mac/hmacsha256"
 )
 
 func TestHMACSHA256Sum(t *testing.T) {
@@ -16,7 +15,7 @@ func TestHMACSHA256Sum(t *testing.T) {
 	expected.Write(msg)
 	want := expected.Sum(nil)
 
-	got := hmacsha256.Sum(key, msg)
+	got := mac.Sum(key, msg)
 	if hex.EncodeToString(got) != hex.EncodeToString(want) {
 		t.Fatalf("unexpected MAC\n got %x\nwant %x", got, want)
 	}
@@ -25,19 +24,19 @@ func TestHMACSHA256Sum(t *testing.T) {
 func TestHMACSHA256Verify(t *testing.T) {
 	key := []byte("another key")
 	msg := []byte("payload")
-	mac := hmacsha256.Sum(key, msg)
-	if !hmacsha256.Verify(key, msg, mac) {
+	tag := mac.Sum(key, msg)
+	if !mac.Verify(key, msg, tag) {
 		t.Fatal("Verify returned false for valid MAC")
 	}
-	if hmacsha256.Verify(key, msg, mac[:len(mac)-1]) {
+	if mac.Verify(key, msg, tag[:len(tag)-1]) {
 		t.Fatal("Verify accepted truncated MAC")
 	}
-	if hmacsha256.Verify(key, append([]byte(nil), msg...), append([]byte(nil), mac...)) != true {
+	if mac.Verify(key, append([]byte(nil), msg...), append([]byte(nil), tag...)) != true {
 		t.Fatal("Verify should succeed with separate buffers")
 	}
-	tampered := append([]byte(nil), mac...)
+	tampered := append([]byte(nil), tag...)
 	tampered[0] ^= 0xff
-	if hmacsha256.Verify(key, msg, tampered) {
+	if mac.Verify(key, msg, tampered) {
 		t.Fatal("Verify accepted tampered MAC")
 	}
 }
