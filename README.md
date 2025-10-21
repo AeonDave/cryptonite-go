@@ -75,11 +75,12 @@ primitives can be swapped transparently.
 
 | Algorithm           | Deriver constructor             | Single-shot helper(s)                                                       | Notes                                                 |
 |---------------------|---------------------------------|-----------------------------------------------------------------------------|-------------------------------------------------------|
-| HKDF-SHA256         | `kdf.NewHKDFSHA256()`           | `kdf.HKDFSHA256()`<br>`kdf.HKDFSHA256Extract()`<br>`kdf.HKDFSHA256Expand()` | Max length 255·32 B (RFC 5869)                        |
-| HKDF (generic hash) | `kdf.NewHKDF(func() hash.Hash)` | `kdf.HKDF()`<br>`kdf.HKDFExtractWith()`<br>`kdf.HKDFExpandWith()`           | Length bound = 255·hash.Size()                        |
+| HKDF-SHA256         | `kdf.NewHKDFSHA256()`           | `kdf.HKDFSHA256()`<br>`kdf.HKDFSHA256Extract()`<br>`kdf.HKDFSHA256Expand()` | Max length 255 x 32 B (RFC 5869)                        |
+| HKDF (generic hash) | `kdf.NewHKDF(func() hash.Hash)` | `kdf.HKDF()`<br>`kdf.HKDFExtractWith()`<br>`kdf.HKDFExpandWith()`           | Length bound = 255 x hash.Size()                        |
 | HKDF-BLAKE2b        | `kdf.NewHKDFBlake2b()`          | `kdf.HKDFBlake2b()`                                                         | 64 B digest variant                                   |
 | PBKDF2-SHA1         | `kdf.NewPBKDF2SHA1()`           | `kdf.PBKDF2SHA1()`<br>`kdf.PBKDF2SHA1Into()`                                | See `kdf.CheckParams` for policy checks               |
 | PBKDF2-SHA256       | `kdf.NewPBKDF2SHA256()`         | `kdf.PBKDF2SHA256()`<br>`kdf.PBKDF2SHA256Into()`                            | Iterations > 0; variable output length                |
+| Argon2id            | `kdf.NewArgon2id()`<br>`kdf.NewArgon2idWithParams()` | `kdf.Argon2id()`                                                             | RFC 9106 Argon2id; defaults to time=1, memory=64 MiB, lanes=1 |
 | scrypt              | `kdf.NewScrypt(n, r, p)`        | `kdf.Scrypt()`                                                              | RFC 7914 constraints on n,r,p; variable output length |
 
 ### MAC (Message authentication code)
@@ -380,6 +381,7 @@ on tags and ciphertext.
 - Algorithms require exact key/nonce sizes; invalid sizes result in errors.
 - Deoxys-II produces deterministic keystream inputs and is nonce-misuse resistant, but nonces must remain unique per key
   to avoid revealing repeated plaintext keystream correlations.
+
 
 
 

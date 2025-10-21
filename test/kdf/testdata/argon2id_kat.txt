@@ -1,0 +1,22 @@
+# Argon2id known-answer vectors derived from golang.org/x/crypto/argon2
+
+Time = 1
+MemoryKiB = 64
+Threads = 1
+Password = 70617373776f7264
+Salt = 736f6d6573616c74
+Hash = 655ad15eac652dc59f7170a7332bf49b8469be1fdb9c28bb
+
+Time = 2
+MemoryKiB = 64
+Threads = 1
+Password = 70617373776f7264
+Salt = 736f6d6573616c74
+Hash = 068d62b26455936aa6ebe60060b0a65870dbfa3ddf8d41f7
+
+Time = 2
+MemoryKiB = 64
+Threads = 2
+Password = 70617373776f7264
+Salt = 736f6d6573616c74
+Hash = 350ac37222f436ccb5c0972f1ebd3bf6b958bf2071841362
