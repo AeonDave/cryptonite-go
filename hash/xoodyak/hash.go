@@ -1,8 +1,9 @@
 package xoodyak
 
 import (
-	"hash"
+	stdhash "hash"
 
+	cryptohash "cryptonite-go/hash"
 	xo "cryptonite-go/internal/xoodyak"
 )
 
@@ -14,11 +15,14 @@ type Hash struct {
 }
 
 // New returns a hash.Hash computing the 32-byte Xoodyak digest.
-func New() hash.Hash {
+func New() stdhash.Hash {
 	h := &Hash{}
 	h.Reset()
 	return h
 }
+
+// NewHasher returns a stateless helper implementing hash.Hasher for Xoodyak.
+func NewHasher() cryptohash.Hasher { return hasher{} }
 
 func (h *Hash) Reset() {
 	_ = h.inst.Initialize(nil, nil, nil)
@@ -36,8 +40,39 @@ func (h *Hash) Sum(b []byte) []byte {
 	return append(b, out...)
 }
 
+// Hash computes the digest of msg without altering the streaming state.
+func (h *Hash) Hash(msg []byte) []byte {
+	d := Sum(msg)
+	out := make([]byte, DigestSize)
+	copy(out, d[:])
+	return out
+}
+
 func (h *Hash) Size() int      { return DigestSize }
 func (h *Hash) BlockSize() int { return xo.HashRate }
+
+// Sum returns the Xoodyak hash of msg.
+func Sum(msg []byte) [DigestSize]byte {
+	var inst xo.Instance
+	if err := inst.Initialize(nil, nil, nil); err != nil {
+		panic("xoodyak: unexpected initialize failure")
+	}
+	inst.Absorb(msg)
+	var out [DigestSize]byte
+	inst.SqueezeAny(out[:], 0x00)
+	return out
+}
+
+type hasher struct{}
+
+func (hasher) Hash(msg []byte) []byte {
+	d := Sum(msg)
+	out := make([]byte, DigestSize)
+	copy(out, d[:])
+	return out
+}
+
+func (hasher) Size() int { return DigestSize }
 
 // XOF implements the Xoodyak extendable-output function.
 type XOF struct {
