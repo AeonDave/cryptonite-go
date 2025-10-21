@@ -25,9 +25,9 @@ Goal: provide clear, reproducible, and easily testable implementations of contem
 - ChaCha20-Poly1305 (`aead.NewChaCha20Poly1305()`): Key 32B, Nonce 12B, Tag 16B
 - AES-GCM (`aead.NewAESGCM()`): Key 16/24/32B, Nonce 12B, Tag 16B
 - XChaCha20-Poly1305 (`aead.NewXChaCha20Poly1305()`): Key 32B, Nonce 24B, Tag 16B (via HChaCha20)
-<!-- - AES-128/256-SIV (`aead.NewAES128SIV()`, `aead.NewAES256SIV()`): deterministic IV (placeholder, implementation pending)
-- AES-GCM-SIV (`aead.NewAESGCMSIV()`): nonce-misuse resistant GCM variant (placeholder)
-- Deoxys-II-128 (`aead.NewDeoxysII128()`): NIST LwC finalist (placeholder) -->
+- AES-128/256-SIV (`aead.NewAES128SIV()`, `aead.NewAES256SIV()`): Keys 32B / 64B (split into MAC/CTR halves), deterministic nonce handled as associated data, Tag 16B
+- AES-GCM-SIV (`aead.NewAesGcmSiv()`): Key 16/32B, Nonce 12B, Tag 16B
+- Deoxys-II-256-128 (`aead.NewDeoxysII128()`): Key 32B, Nonce 15B, Tag 16B (NIST LwC finalist)
 
 **Hash / XOF**
 - Xoodyak Hash (32-byte digest) via `hash/xoodyak.New()`
@@ -241,11 +241,4 @@ Tests include KAT suites for ASCON, Xoodyak, and ChaCha20‑Poly1305, plus tampe
 - This library has not undergone independent security audits. Do not use in production without a thorough review.
 - Implementations aim to be constant-time where required (e.g., Poly1305 follows the upstream bit-sliced algorithm). Review and test before use in side-channel-sensitive environments.
 - Algorithms require exact key/nonce sizes; invalid sizes result in errors.
-- AES-SIV, AES-GCM-SIV, and Deoxys-II constructors are currently placeholders that return `not implemented` errors; they are listed to document the planned API.
-
-
-## Roadmap (ideas)
-
-- Elliptic curves and related primitives (ECDH/ECDSA, EdDSA) in pure Go.
-- Streaming/incremental APIs where appropriate (buffered AD/PT processing).
-- Reproducible benchmarks and performance profiles.
+- Deoxys-II produces deterministic keystream inputs and is nonce-misuse resistant, but nonces must remain unique per key to avoid revealing repeated plaintext keystream correlations.
