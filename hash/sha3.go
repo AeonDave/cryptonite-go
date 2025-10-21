@@ -3,7 +3,7 @@ package hash
 import (
 	stdhash "hash"
 
-	"cryptonite-go/internal/keccak"
+	"github.com/AeonDave/cryptonite-go/internal/keccak"
 )
 
 const (

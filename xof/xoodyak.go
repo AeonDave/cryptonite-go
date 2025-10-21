@@ -1,6 +1,6 @@
 package xof
 
-import "cryptonite-go/internal/xoodyak"
+import "github.com/AeonDave/cryptonite-go/internal/xoodyak"
 
 type xoodyakXOF struct {
 	inst    xoodyak.Instance

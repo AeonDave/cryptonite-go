@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	cryptohash "cryptonite-go/hash"
-	testutil "cryptonite-go/test/internal/testutil"
-	"cryptonite-go/xof"
+	cryptohash "github.com/AeonDave/cryptonite-go/hash"
+	testutil "github.com/AeonDave/cryptonite-go/test/internal/testutil"
+	"github.com/AeonDave/cryptonite-go/xof"
 )
 
 //go:embed testdata/xoodyak_hash_kat.txt
@@ -41,8 +41,8 @@ func parseXoodyakHashKAT(t *testing.T) []xoodyakHashCase {
 		}
 		msg := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(msgLine, "Msg =")))
 		md := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(mdLine, "MD =")))
-		xof := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(xofLine, "XOF =")))
-		cases = append(cases, xoodyakHashCase{msg: msg, md: md, xof: xof})
+		x := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(xofLine, "XOF =")))
+		cases = append(cases, xoodyakHashCase{msg: msg, md: md, xof: x})
 		i += 4
 		if i < len(lines) && strings.TrimSpace(lines[i]) == "" {
 			i++

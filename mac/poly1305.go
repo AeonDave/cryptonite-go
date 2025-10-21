@@ -3,7 +3,7 @@ package mac
 import (
 	"errors"
 
-	internal "cryptonite-go/internal/poly1305"
+	internal "github.com/AeonDave/cryptonite-go/internal/poly1305"
 )
 
 const (

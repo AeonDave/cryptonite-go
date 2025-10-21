@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"cryptonite-go/stream"
-	testutil "cryptonite-go/test/internal/testutil"
+	"github.com/AeonDave/cryptonite-go/stream"
+	testutil "github.com/AeonDave/cryptonite-go/test/internal/testutil"
 )
 
 //go:embed testdata/chacha20_kat.txt

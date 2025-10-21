@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"cryptonite-go/aead"
-	testutil "cryptonite-go/test/internal/testutil"
+	"github.com/AeonDave/cryptonite-go/aead"
+	testutil "github.com/AeonDave/cryptonite-go/test/internal/testutil"
 )
 
 //go:embed testdata/deoxysii_kat.json

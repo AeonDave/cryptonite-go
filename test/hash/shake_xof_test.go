@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	testutil "cryptonite-go/test/internal/testutil"
-	"cryptonite-go/xof"
+	testutil "github.com/AeonDave/cryptonite-go/test/internal/testutil"
+	"github.com/AeonDave/cryptonite-go/xof"
 )
 
 //go:embed testdata/shake_kat.txt
@@ -55,8 +55,8 @@ func parseSHAKEKAT(t *testing.T) []shakeCase {
 			t.Fatalf("non-byte-aligned length %d", bitLen)
 		}
 		xofHex := strings.TrimSpace(strings.TrimPrefix(xofLine, "XOF ="))
-		xof := testutil.MustHex(t, xofHex)
-		cases = append(cases, shakeCase{variant: variant, msg: msg, outLen: bitLen / 8, xof: xof})
+		x := testutil.MustHex(t, xofHex)
+		cases = append(cases, shakeCase{variant: variant, msg: msg, outLen: bitLen / 8, xof: x})
 		i += 4
 		if i < len(lines) && strings.TrimSpace(lines[i]) == "" {
 			i++

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	cryptohash "cryptonite-go/hash"
-	testutil "cryptonite-go/test/internal/testutil"
+	cryptohash "github.com/AeonDave/cryptonite-go/hash"
+	testutil "github.com/AeonDave/cryptonite-go/test/internal/testutil"
 )
 
 //go:embed testdata/sha3_kat.txt

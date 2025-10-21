@@ -4,8 +4,8 @@ import (
 	"errors"
 	"math"
 
-	"cryptonite-go/internal/blake2b"
-	"cryptonite-go/internal/blake2s"
+	"github.com/AeonDave/cryptonite-go/internal/blake2b"
+	"github.com/AeonDave/cryptonite-go/internal/blake2s"
 )
 
 // Blake2bUnknown indicates that the output length of a BLAKE2b XOF is

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"cryptonite-go/block"
-	testutil "cryptonite-go/test/internal/testutil"
+	"github.com/AeonDave/cryptonite-go/block"
+	testutil "github.com/AeonDave/cryptonite-go/test/internal/testutil"
 )
 
 //go:embed testdata/aes_kat.txt

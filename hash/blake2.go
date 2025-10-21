@@ -5,9 +5,9 @@ import (
 	stdhash "hash"
 	"math"
 
-	"cryptonite-go/internal/blake2b"
-	"cryptonite-go/internal/blake2s"
-	"cryptonite-go/xof"
+	"github.com/AeonDave/cryptonite-go/internal/blake2b"
+	"github.com/AeonDave/cryptonite-go/internal/blake2s"
+	"github.com/AeonDave/cryptonite-go/xof"
 )
 
 // Blake2bXOFUnknown indicates that the output length of a BLAKE2b XOF is

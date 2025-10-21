@@ -3,7 +3,7 @@ package hash
 import (
 	stdhash "hash"
 
-	xo "cryptonite-go/internal/xoodyak"
+	xo "github.com/AeonDave/cryptonite-go/internal/xoodyak"
 )
 
 const DigestSize = 32

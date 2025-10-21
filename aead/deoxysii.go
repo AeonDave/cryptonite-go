@@ -3,7 +3,7 @@ package aead
 import (
 	"errors"
 
-	"cryptonite-go/internal/deoxysii"
+	"github.com/AeonDave/cryptonite-go/internal/deoxysii"
 )
 
 type deoxysII128 struct{}

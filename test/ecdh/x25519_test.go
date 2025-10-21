@@ -2,8 +2,8 @@ package ecdh_test
 
 import (
 	"bytes"
-	xdh "cryptonite-go/ecdh"
-	"cryptonite-go/test/internal/testutil"
+	xdh "github.com/AeonDave/cryptonite-go/ecdh"
+	"github.com/AeonDave/cryptonite-go/test/internal/testutil"
 	"testing"
 )
 

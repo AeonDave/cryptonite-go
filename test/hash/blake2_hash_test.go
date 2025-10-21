@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	cryptohash "cryptonite-go/hash"
-	testutil "cryptonite-go/test/internal/testutil"
-	"cryptonite-go/xof"
+	cryptohash "github.com/AeonDave/cryptonite-go/hash"
+	testutil "github.com/AeonDave/cryptonite-go/test/internal/testutil"
+	"github.com/AeonDave/cryptonite-go/xof"
 )
 
 //go:embed testdata/blake2_kat.txt

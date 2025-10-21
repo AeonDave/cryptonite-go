@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"cryptonite-go/kdf"
-	testutil "cryptonite-go/test/internal/testutil"
+	"github.com/AeonDave/cryptonite-go/kdf"
+	testutil "github.com/AeonDave/cryptonite-go/test/internal/testutil"
 )
 
 //go:embed testdata/pbkdf2_kat.txt

@@ -2,8 +2,8 @@ package sig_test
 
 import (
 	"bytes"
-	sig "cryptonite-go/sig"
-	"cryptonite-go/test/internal/testutil"
+	sig "github.com/AeonDave/cryptonite-go/sig"
+	"github.com/AeonDave/cryptonite-go/test/internal/testutil"
 	"testing"
 )
 

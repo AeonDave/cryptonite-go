@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	cryptohash "cryptonite-go/hash"
-	"cryptonite-go/kdf"
-	testutil "cryptonite-go/test/internal/testutil"
+	cryptohash "github.com/AeonDave/cryptonite-go/hash"
+	"github.com/AeonDave/cryptonite-go/kdf"
+	testutil "github.com/AeonDave/cryptonite-go/test/internal/testutil"
 )
 
 //go:embed testdata/hkdf_sha256_kat.txt

@@ -4,7 +4,7 @@ import (
 	"crypto/subtle"
 	"errors"
 
-	xo "cryptonite-go/internal/xoodyak"
+	xo "github.com/AeonDave/cryptonite-go/internal/xoodyak"
 )
 
 const (

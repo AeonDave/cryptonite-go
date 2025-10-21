@@ -6,7 +6,7 @@ import (
 	"errors"
 	stdhash "hash"
 
-	"cryptonite-go/internal/blake2b"
+	"github.com/AeonDave/cryptonite-go/internal/blake2b"
 )
 
 const (

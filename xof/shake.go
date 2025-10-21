@@ -1,6 +1,6 @@
 package xof
 
-import "cryptonite-go/internal/keccak"
+import "github.com/AeonDave/cryptonite-go/internal/keccak"
 
 type shakeXOF struct {
 	sponge keccak.Sponge

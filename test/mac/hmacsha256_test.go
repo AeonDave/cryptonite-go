@@ -3,8 +3,8 @@ package mac_test
 import (
 	"crypto/hmac"
 	"crypto/sha256"
-	"cryptonite-go/mac"
 	"encoding/hex"
+	"github.com/AeonDave/cryptonite-go/mac"
 	"testing"
 )
 

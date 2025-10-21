@@ -4,8 +4,8 @@ import (
 	"crypto/subtle"
 	"errors"
 
-	"cryptonite-go/internal/chacha20"
-	"cryptonite-go/internal/poly1305"
+	"github.com/AeonDave/cryptonite-go/internal/chacha20"
+	"github.com/AeonDave/cryptonite-go/internal/poly1305"
 )
 
 const (
