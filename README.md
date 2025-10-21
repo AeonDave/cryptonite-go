@@ -10,6 +10,8 @@ Goal: provide clear, reproducible, and easily testable implementations of contem
 - Stdlib-only: no third-party packages.
 - Uniform AEAD API via `Aead` (`Encrypt`/`Decrypt`).
 - Hash/XOF helpers under `hash/xoodyak` (`New`, `NewXOF`).
+- SHA-3 hash helpers under `hash/sha3` (`Newsha3*`, `Sum*`).
+- SHAKE extendable-output functions under `hash/shake` (`NewSHAKE128`, `NewSHAKE256`).
 - KDF helpers under `kdf` (HKDF-SHA256, PBKDF2-HMAC-SHA1/SHA256).
 - Signature and key-agreement wrappers under `sig/ed25519` and `ecdh/p256`.
 - Authentication tag layout is always `ciphertext || tag`.
@@ -30,6 +32,8 @@ Goal: provide clear, reproducible, and easily testable implementations of contem
 - Deoxys-II-256-128 (`aead.NewDeoxysII128()`): Key 32B, Nonce 15B, Tag 16B (NIST LwC finalist)
 
 **Hash / XOF**
+- SHA3-224 / SHA3-256 / SHA3-384 / SHA3-512 via `hash/sha3.Newsha3*` or `hash/sha3.Sum*`
+- SHAKE128 / SHAKE256 XOFs via `hash/shake.NewSHAKE*`
 - Xoodyak Hash (32-byte digest) via `hash/xoodyak.New()`
 - Xoodyak XOF (arbitrary length) via `hash/xoodyak.NewXOF()`
 
@@ -169,6 +173,21 @@ func main() {
     buf := make([]byte, 64)
     xof.Read(buf)
     fmt.Printf("%x\n", buf)
+}
+```
+
+SHA3-256 convenience helper
+```go
+package main
+
+import (
+    "fmt"
+    "cryptonite-go/hash/sha3"
+)
+
+func main() {
+    digest := sha3.Sum256([]byte("hello sha3"))
+    fmt.Printf("%x\n", digest)
 }
 ```
 

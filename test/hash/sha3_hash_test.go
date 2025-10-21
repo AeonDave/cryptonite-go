@@ -95,5 +95,24 @@ func TestSHA3KAT(t *testing.T) {
 		if !bytes.Equal(got, tc.md) {
 			t.Fatalf("digest mismatch after reset for case %d (%s)", idx+1, tc.variant)
 		}
+
+		switch tc.variant {
+		case "SHA3-224":
+			if got := sha3.Sum224(tc.msg); !bytes.Equal(got[:], tc.md) {
+				t.Fatalf("Sum224 mismatch case %d", idx+1)
+			}
+		case "SHA3-256":
+			if got := sha3.Sum256(tc.msg); !bytes.Equal(got[:], tc.md) {
+				t.Fatalf("Sum256 mismatch case %d", idx+1)
+			}
+		case "SHA3-384":
+			if got := sha3.Sum384(tc.msg); !bytes.Equal(got[:], tc.md) {
+				t.Fatalf("Sum384 mismatch case %d", idx+1)
+			}
+		case "SHA3-512":
+			if got := sha3.Sum512(tc.msg); !bytes.Equal(got[:], tc.md) {
+				t.Fatalf("Sum512 mismatch case %d", idx+1)
+			}
+		}
 	}
 }
