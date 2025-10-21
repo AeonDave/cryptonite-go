@@ -35,7 +35,7 @@ func wrapXOF(impl xofImpl) *XOF {
 	return &XOF{impl: impl}
 }
 
-// Reset reinitialises the XOF to its initial state.
+// Reset reinitialize the XOF to its initial state.
 func (x *XOF) Reset() {
 	x.impl.Reset()
 }

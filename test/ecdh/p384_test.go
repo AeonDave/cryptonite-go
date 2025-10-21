@@ -2,7 +2,7 @@ package ecdh_test
 
 import (
 	"bytes"
-	p384 "cryptonite-go/ecdh/p384"
+	p384 "cryptonite-go/ecdh"
 	"cryptonite-go/test/internal/testutil"
 	"testing"
 )
@@ -13,18 +13,18 @@ func TestP384KnownVector(t *testing.T) {
 	peerBytes := testutil.MustHex(t, "04645E4ABDA6C153BC4D5F3DE0C2B1885CCAC80D1047E134C8760B229486CCCFA7331B30AE57D9308D14C37A36754D5E13E6F9F397199E433A7F161E0886F8FC9B5BBC698FD133628B503466AAA57D4795E03546861F76E33704C73C58CCE0C65A")
 	secretExp := testutil.MustHex(t, "84899D3E0A01D2BA5AD458C240C89FADC0F85C2C32A15FAF1D325C6132AC7B2B42D31F1D5C6D4619C9C17A7C5D62B243")
 
-	priv, err := p384.NewPrivateKey(privBytes)
+	priv, err := p384.NewPrivateKeyP384(privBytes)
 	if err != nil {
 		t.Fatalf("NewPrivateKey failed: %v", err)
 	}
 	if got := priv.PublicKey().Bytes(); !bytes.Equal(got, pubBytes) {
 		t.Fatalf("public key mismatch\n got %X\nwant %X", got, pubBytes)
 	}
-	peer, err := p384.NewPublicKey(peerBytes)
+	peer, err := p384.NewPublicKeyP384(peerBytes)
 	if err != nil {
 		t.Fatalf("NewPublicKey failed: %v", err)
 	}
-	secret, err := p384.SharedSecret(priv, peer)
+	secret, err := p384.SharedSecretP384(priv, peer)
 	if err != nil {
 		t.Fatalf("SharedSecret failed: %v", err)
 	}
@@ -34,19 +34,19 @@ func TestP384KnownVector(t *testing.T) {
 }
 
 func TestP384GenerateKey(t *testing.T) {
-	privA, err := p384.GenerateKey()
+	privA, err := p384.GenerateKeyP384()
 	if err != nil {
-		t.Fatalf("GenerateKey A failed: %v", err)
+		t.Fatalf("GenerateKeyP384 A failed: %v", err)
 	}
-	privB, err := p384.GenerateKey()
+	privB, err := p384.GenerateKeyP384()
 	if err != nil {
-		t.Fatalf("GenerateKey B failed: %v", err)
+		t.Fatalf("GenerateKeyP384 B failed: %v", err)
 	}
-	secretA, err := p384.SharedSecret(privA, privB.PublicKey())
+	secretA, err := p384.SharedSecretP384(privA, privB.PublicKey())
 	if err != nil {
 		t.Fatalf("SharedSecret A failed: %v", err)
 	}
-	secretB, err := p384.SharedSecret(privB, privA.PublicKey())
+	secretB, err := p384.SharedSecretP384(privB, privA.PublicKey())
 	if err != nil {
 		t.Fatalf("SharedSecret B failed: %v", err)
 	}
@@ -56,7 +56,7 @@ func TestP384GenerateKey(t *testing.T) {
 }
 
 func TestP384Interface(t *testing.T) {
-	ke := p384.New()
+	ke := p384.NewP384()
 	priv, err := ke.GenerateKey()
 	if err != nil {
 		t.Fatalf("GenerateKey via interface failed: %v", err)

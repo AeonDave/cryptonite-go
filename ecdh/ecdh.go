@@ -18,8 +18,8 @@ type KeyExchange interface {
 	NewPrivateKey(d []byte) (*stdecdh.PrivateKey, error)
 	// NewPublicKey parses a peer public key in the format required by the curve.
 	NewPublicKey(b []byte) (*stdecdh.PublicKey, error)
-	// SharedSecret performs the ECDH operation between priv and peer.
-	SharedSecret(priv *stdecdh.PrivateKey, peer *stdecdh.PublicKey) ([]byte, error)
+	// SharedSecret performs the ECDH operation between private and peer.
+	SharedSecret(p *stdecdh.PrivateKey, peer *stdecdh.PublicKey) ([]byte, error)
 }
 
 type curveImpl struct {
@@ -48,6 +48,6 @@ func (c *curveImpl) NewPublicKey(b []byte) (*stdecdh.PublicKey, error) {
 	return c.curve.NewPublicKey(b)
 }
 
-func (c *curveImpl) SharedSecret(priv *stdecdh.PrivateKey, peer *stdecdh.PublicKey) ([]byte, error) {
-	return priv.ECDH(peer)
+func (c *curveImpl) SharedSecret(p *stdecdh.PrivateKey, peer *stdecdh.PublicKey) ([]byte, error) {
+	return p.ECDH(peer)
 }

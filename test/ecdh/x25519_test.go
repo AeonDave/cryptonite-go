@@ -2,7 +2,7 @@ package ecdh_test
 
 import (
 	"bytes"
-	xdh "cryptonite-go/ecdh/x25519"
+	xdh "cryptonite-go/ecdh"
 	"cryptonite-go/test/internal/testutil"
 	"testing"
 )

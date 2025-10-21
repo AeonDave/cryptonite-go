@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	sig "cryptonite-go/sig"
-	p256sig "cryptonite-go/sig/p256"
 	"cryptonite-go/test/internal/testutil"
 )
 
@@ -19,19 +18,19 @@ func TestP256RFC6979Vector(t *testing.T) {
 	rExp := testutil.MustHex(t, "EFD48B2AACB6A8FD1140DD9CD45E81D69D2C877B56AAF991C34D0EA84EAF3716")
 	sExp := testutil.MustHex(t, "F7CB1C942D657C41D436C7A1B6E29F65F3E900DBB9AFF4064DC4AB2F843ACDA8")
 
-	priv, err := p256sig.NewPrivateKey(privBytes)
+	priv, err := sig.NewPrivateKey(privBytes)
 	if err != nil {
 		t.Fatalf("NewPrivateKey failed: %v", err)
 	}
-	pubBytes := p256sig.MarshalPublicKey(&priv.PublicKey)
-	pub, err := p256sig.ParsePublicKey(pubBytes)
+	pubBytes := sig.MarshalPublicKey(&priv.PublicKey)
+	pub, err := sig.ParsePublicKey(pubBytes)
 	if err != nil {
 		t.Fatalf("ParsePublicKey failed: %v", err)
 	}
-	if !p256sig.VerifyASN1(pub, hash[:], sigDER) {
+	if !sig.VerifyASN1(pub, hash[:], sigDER) {
 		t.Fatalf("VerifyASN1 rejected known signature")
 	}
-	r, s, err := p256sig.ParseSignature(sigDER)
+	r, s, err := sig.ParseSignature(sigDER)
 	if err != nil {
 		t.Fatalf("ParseSignature failed: %v", err)
 	}
@@ -41,45 +40,45 @@ func TestP256RFC6979Vector(t *testing.T) {
 }
 
 func TestP256SignAndVerify(t *testing.T) {
-	priv, err := p256sig.GenerateKey()
+	priv, err := sig.GenerateKeyP256()
 	if err != nil {
-		t.Fatalf("GenerateKey failed: %v", err)
+		t.Fatalf("GenerateKeyP256 failed: %v", err)
 	}
 	hash := sha256.Sum256([]byte("hello world"))
-	sigDER, err := p256sig.SignASN1(priv, hash[:])
+	sigDER, err := sig.SignASN1(priv, hash[:])
 	if err != nil {
 		t.Fatalf("SignASN1 failed: %v", err)
 	}
-	if !p256sig.VerifyASN1(&priv.PublicKey, hash[:], sigDER) {
+	if !sig.VerifyASN1(&priv.PublicKey, hash[:], sigDER) {
 		t.Fatalf("VerifyASN1 failed for generated signature")
 	}
 	tampered := append([]byte{}, sigDER...)
 	tampered[len(tampered)-1] ^= 0x01
-	if p256sig.VerifyASN1(&priv.PublicKey, hash[:], tampered) {
+	if sig.VerifyASN1(&priv.PublicKey, hash[:], tampered) {
 		t.Fatalf("VerifyASN1 accepted tampered signature")
 	}
 }
 
 func TestP256MarshalRoundTrip(t *testing.T) {
-	priv, err := p256sig.GenerateKey()
+	priv, err := sig.GenerateKeyP256()
 	if err != nil {
-		t.Fatalf("GenerateKey failed: %v", err)
+		t.Fatalf("GenerateKeyP256 failed: %v", err)
 	}
-	scalar := p256sig.MarshalPrivateKey(priv)
-	if len(scalar) != p256sig.ScalarSize {
+	scalar := sig.MarshalPrivateKey(priv)
+	if len(scalar) != sig.ScalarSize {
 		t.Fatalf("unexpected scalar length")
 	}
-	priv2, err := p256sig.NewPrivateKey(scalar)
+	priv2, err := sig.NewPrivateKey(scalar)
 	if err != nil {
 		t.Fatalf("NewPrivateKey failed: %v", err)
 	}
-	if !bytes.Equal(p256sig.MarshalPublicKey(&priv.PublicKey), p256sig.MarshalPublicKey(&priv2.PublicKey)) {
+	if !bytes.Equal(sig.MarshalPublicKey(&priv.PublicKey), sig.MarshalPublicKey(&priv2.PublicKey)) {
 		t.Fatalf("public key mismatch after round trip")
 	}
 }
 
 func TestP256SchemeInterface(t *testing.T) {
-	var scheme sig.Scheme = p256sig.New()
+	var scheme sig.Signature = sig.New()
 	pub, priv, err := scheme.GenerateKey()
 	if err != nil {
 		t.Fatalf("GenerateKey failed: %v", err)

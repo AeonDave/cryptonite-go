@@ -3,7 +3,6 @@ package sig_test
 import (
 	"bytes"
 	sig "cryptonite-go/sig"
-	xsig "cryptonite-go/sig/x25519"
 	"cryptonite-go/test/internal/testutil"
 	"testing"
 )
@@ -14,7 +13,7 @@ func TestX25519RFC8032Vector(t *testing.T) {
 	sigExp := testutil.MustHex(t, "E5564300C360AC729086E2CC806E828A84877F1EB8E5D974D873E065224901555FB8821590A33BACC61E39701CF9B46BD25BF5F0595BBE24655141438E7A100B")
 	msg := []byte{}
 
-	pub, priv, err := xsig.FromSeed(seed)
+	pub, priv, err := sig.FromSeed(seed)
 	if err != nil {
 		t.Fatalf("FromSeed failed: %v", err)
 	}
@@ -22,20 +21,20 @@ func TestX25519RFC8032Vector(t *testing.T) {
 		t.Fatalf("public key mismatch\n got %x\nwant %x", pub, pubExp)
 	}
 
-	sigBytes := xsig.Sign(priv, msg)
+	sigBytes := sig.Sign(priv, msg)
 	if !bytes.Equal(sigBytes, sigExp) {
 		t.Fatalf("signature mismatch\n got %x\nwant %x", sigBytes, sigExp)
 	}
-	if !xsig.Verify(pub, msg, sigBytes) {
+	if !sig.Verify(pub, msg, sigBytes) {
 		t.Fatalf("verification failed for valid signature")
 	}
-	if xsig.Verify(pub, []byte{0x01}, sigBytes) {
+	if sig.Verify(pub, []byte{0x01}, sigBytes) {
 		t.Fatalf("verification succeeded on tampered message")
 	}
 }
 
 func TestX25519GenerateKey(t *testing.T) {
-	pub, priv, err := xsig.GenerateKey()
+	pub, priv, err := sig.GenerateKey()
 	if err != nil {
 		t.Fatalf("GenerateKey failed: %v", err)
 	}

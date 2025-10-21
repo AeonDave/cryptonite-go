@@ -1,8 +1,8 @@
 package sig
 
-// Scheme defines the minimal single-shot signing API implemented by the
+// Signature defines the minimal single-shot signing API implemented by the
 // signature helpers exposed under sig/.
-type Scheme interface {
+type Signature interface {
 	// GenerateKey returns the encoded public and private key material.
 	GenerateKey() (public []byte, private []byte, err error)
 	// Sign produces a signature over msg using the encoded private key.

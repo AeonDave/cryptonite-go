@@ -1,4 +1,4 @@
-package p256
+package sig
 
 import (
 	"crypto/ecdsa"
@@ -19,13 +19,13 @@ var (
 	order = curve.Params().N
 )
 
-type Scheme struct{}
+type p256Scheme struct{}
 
-// New returns a Scheme for deterministic ECDSA over P-256 using DER signatures.
-func New() Scheme { return Scheme{} }
+// New returns a Signature for deterministic ECDSA over P-256 using DER signatures.
+func New() Signature { return p256Scheme{} }
 
-// GenerateKey creates a new ECDSA P-256 keypair using crypto/rand.
-func GenerateKey() (*ecdsa.PrivateKey, error) {
+// GenerateKeyP256 creates a new ECDSA P-256 keypair using crypto/rand.
+func GenerateKeyP256() (*ecdsa.PrivateKey, error) {
 	return ecdsa.GenerateKey(curve, rand.Reader)
 }
 
@@ -38,28 +38,41 @@ func NewPrivateKey(d []byte) (*ecdsa.PrivateKey, error) {
 	if k.Sign() <= 0 || k.Cmp(order) >= 0 {
 		return nil, errors.New("p256: scalar outside valid range")
 	}
-	priv := new(ecdsa.PrivateKey)
-	priv.Curve = curve
-	priv.D = k
-	priv.X, priv.Y = curve.ScalarBaseMult(d)
-	return priv, nil
+	p := new(ecdsa.PrivateKey)
+	p.Curve = curve
+	p.D = k
+	p.X, p.Y = curve.ScalarBaseMult(d)
+	return p, nil
 }
 
 // MarshalPrivateKey returns the 32-byte scalar for priv.
-func MarshalPrivateKey(priv *ecdsa.PrivateKey) []byte {
-	return priv.D.FillBytes(make([]byte, ScalarSize))
+func MarshalPrivateKey(p *ecdsa.PrivateKey) []byte {
+	return p.D.FillBytes(make([]byte, ScalarSize))
 }
 
 // MarshalPublicKey serialises pub as an uncompressed point.
 func MarshalPublicKey(pub *ecdsa.PublicKey) []byte {
-	return elliptic.Marshal(curve, pub.X, pub.Y)
+	if pub == nil || pub.Curve != curve {
+		return nil
+	}
+	size := (curve.Params().BitSize + 7) / 8
+	out := make([]byte, 1+2*size)
+	out[0] = 0x04 // uncompressed form tag
+	pub.X.FillBytes(out[1 : 1+size])
+	pub.Y.FillBytes(out[1+size:])
+	return out
 }
 
-// ParsePublicKey deserialises an uncompressed public key.
+// ParsePublicKey deserializes an uncompressed public key.
 func ParsePublicKey(b []byte) (*ecdsa.PublicKey, error) {
-	x, y := elliptic.Unmarshal(curve, b)
-	if x == nil || y == nil {
-		return nil, errors.New("p256: invalid public key")
+	size := (curve.Params().BitSize + 7) / 8
+	if len(b) != 1+2*size || b[0] != 0x04 {
+		return nil, errors.New("p256: invalid public key encoding")
+	}
+	x := new(big.Int).SetBytes(b[1 : 1+size])
+	y := new(big.Int).SetBytes(b[1+size:])
+	if x.Sign() == 0 && y.Sign() == 0 {
+		return nil, errors.New("p256: invalid point at infinity")
 	}
 	if !curve.IsOnCurve(x, y) {
 		return nil, errors.New("p256: point not on curve")
@@ -68,8 +81,8 @@ func ParsePublicKey(b []byte) (*ecdsa.PublicKey, error) {
 }
 
 // SignASN1 generates an ECDSA signature over hash using priv, returning DER encoding.
-func SignASN1(priv *ecdsa.PrivateKey, hash []byte) ([]byte, error) {
-	return ecdsa.SignASN1(rand.Reader, priv, hash)
+func SignASN1(p *ecdsa.PrivateKey, hash []byte) ([]byte, error) {
+	return ecdsa.SignASN1(rand.Reader, p, hash)
 }
 
 // VerifyASN1 reports whether sig is a valid DER-encoded ECDSA signature for hash.
@@ -91,29 +104,29 @@ func ParseSignature(sig []byte) (*big.Int, *big.Int, error) {
 	return parsed.R, parsed.S, nil
 }
 
-func (Scheme) GenerateKey() ([]byte, []byte, error) {
-	priv, err := GenerateKey()
+func (p256Scheme) GenerateKey() ([]byte, []byte, error) {
+	p, err := GenerateKeyP256()
 	if err != nil {
 		return nil, nil, err
 	}
-	pubBytes := MarshalPublicKey(&priv.PublicKey)
-	privBytes := MarshalPrivateKey(priv)
-	return append([]byte(nil), pubBytes...), append([]byte(nil), privBytes...), nil
+	pubBytes := MarshalPublicKey(&p.PublicKey)
+	pBytes := MarshalPrivateKey(p)
+	return append([]byte(nil), pubBytes...), append([]byte(nil), pBytes...), nil
 }
 
-func (Scheme) Sign(private []byte, msg []byte) ([]byte, error) {
-	priv, err := NewPrivateKey(private)
+func (p256Scheme) Sign(private []byte, msg []byte) ([]byte, error) {
+	p, err := NewPrivateKey(private)
 	if err != nil {
 		return nil, err
 	}
-	sig, err := SignASN1(priv, msg)
+	sig, err := SignASN1(p, msg)
 	if err != nil {
 		return nil, err
 	}
 	return append([]byte(nil), sig...), nil
 }
 
-func (Scheme) Verify(public []byte, msg, signature []byte) bool {
+func (p256Scheme) Verify(public []byte, msg, signature []byte) bool {
 	pub, err := ParsePublicKey(public)
 	if err != nil {
 		return false

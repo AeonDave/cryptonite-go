@@ -61,16 +61,16 @@ func TestSHA3KAT(t *testing.T) {
 		t.Fatal("no SHA3 cases parsed")
 	}
 	constructors := map[string]func() stdhash.Hash{
-		"SHA3-224": cryptohash.Newsha3224,
-		"SHA3-256": cryptohash.Newsha3256,
-		"SHA3-384": cryptohash.Newsha3384,
-		"SHA3-512": cryptohash.Newsha3512,
+		"SHA3-224": cryptohash.NewSha3224,
+		"SHA3-256": cryptohash.NewSha3256,
+		"SHA3-384": cryptohash.NewSha3384,
+		"SHA3-512": cryptohash.NewSha3512,
 	}
 	stateless := map[string]func() cryptohash.Hasher{
-		"SHA3-224": cryptohash.Newsha3224Hasher,
-		"SHA3-256": cryptohash.Newsha3256Hasher,
-		"SHA3-384": cryptohash.Newsha3384Hasher,
-		"SHA3-512": cryptohash.Newsha3512Hasher,
+		"SHA3-224": cryptohash.NewSha3224Hasher,
+		"SHA3-256": cryptohash.NewSha3256Hasher,
+		"SHA3-384": cryptohash.NewSha3384Hasher,
+		"SHA3-512": cryptohash.NewSha3512Hasher,
 	}
 	for idx, tc := range cases {
 		newHash, ok := constructors[tc.variant]
