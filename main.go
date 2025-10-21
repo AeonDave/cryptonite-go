@@ -1,1 +1,0 @@
-package cryptonite_go
