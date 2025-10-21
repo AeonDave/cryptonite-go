@@ -7,15 +7,16 @@ import (
 
 	"cryptonite-go/internal/blake2b"
 	"cryptonite-go/internal/blake2s"
+	"cryptonite-go/xof"
 )
 
 // Blake2bXOFUnknown indicates that the output length of a BLAKE2b XOF is
 // unspecified in advance.
-const Blake2bXOFUnknown = blake2b.OutputLengthUnknown
+const Blake2bXOFUnknown = xof.Blake2bUnknown
 
 // Blake2sXOFUnknown indicates that the output length of a BLAKE2s XOF is
 // unspecified in advance.
-const Blake2sXOFUnknown = blake2s.OutputLengthUnknown
+const Blake2sXOFUnknown = xof.Blake2sUnknown
 
 // Blake2bBuilder constructs keyed or unkeyed BLAKE2b hash and XOF instances.
 type Blake2bBuilder struct {
@@ -69,12 +70,8 @@ func (b Blake2bBuilder) Sum(msg []byte) ([]byte, error) {
 
 // XOF returns an extendable-output function using the configured key and the
 // requested output length. For unknown-length output use Blake2bXOFUnknown.
-func (b Blake2bBuilder) XOF(length uint32) (XOF, error) {
-	x, err := blake2b.NewXOF(length, b.key)
-	if err != nil {
-		return nil, err
-	}
-	return wrapXOF(&blake2bXOFAdapter{x: x}), nil
+func (b Blake2bBuilder) XOF(length uint32) (xof.XOF, error) {
+	return xof.Blake2b(length, b.key)
 }
 
 // NewBlake2b returns a streaming BLAKE2b hash.Hash with the specified digest
@@ -90,12 +87,9 @@ func NewBlake2bHasher(size int, key []byte) (Hasher, error) {
 }
 
 // NewBlake2bXOF constructs a BLAKE2b extendable-output instance.
-func NewBlake2bXOF(length uint32, key []byte) (XOF, error) {
-	x, err := blake2b.NewXOF(length, key)
-	if err != nil {
-		return nil, err
-	}
-	return wrapXOF(&blake2bXOFAdapter{x: x}), nil
+// Deprecated: use xof.Blake2b.
+func NewBlake2bXOF(length uint32, key []byte) (xof.XOF, error) {
+	return xof.Blake2b(length, key)
 }
 
 // Blake2sBuilder constructs keyed or unkeyed BLAKE2s hash and XOF instances.
@@ -149,15 +143,11 @@ func (b Blake2sBuilder) Sum(msg []byte) ([]byte, error) {
 
 // XOF returns an extendable-output function using the configured key and the
 // requested output length. For unknown-length output use Blake2sXOFUnknown.
-func (b Blake2sBuilder) XOF(length uint32) (XOF, error) {
+func (b Blake2sBuilder) XOF(length uint32) (xof.XOF, error) {
 	if length != Blake2sXOFUnknown && length > math.MaxUint16 {
 		return nil, errors.New("hash: blake2s XOF length too large")
 	}
-	x, err := blake2s.NewXOF(uint16(length), b.key)
-	if err != nil {
-		return nil, err
-	}
-	return wrapXOF(&blake2sXOFAdapter{x: x}), nil
+	return xof.Blake2s(length, b.key)
 }
 
 // NewBlake2s returns a streaming BLAKE2s hash.Hash with the specified digest
@@ -172,16 +162,12 @@ func NewBlake2sHasher(size int, key []byte) (Hasher, error) {
 	return newBlake2Hasher(blake2s.New, blake2s.Size, size, key)
 }
 
-// NewBlake2sXOF constructs a BLAKE2s extendable-output instance.
-func NewBlake2sXOF(length uint32, key []byte) (XOF, error) {
+// Deprecated: use xof.Blake2s.
+func NewBlake2sXOF(length uint32, key []byte) (xof.XOF, error) {
 	if length != Blake2sXOFUnknown && length > math.MaxUint16 {
 		return nil, errors.New("hash: blake2s XOF length too large")
 	}
-	x, err := blake2s.NewXOF(uint16(length), key)
-	if err != nil {
-		return nil, err
-	}
-	return wrapXOF(&blake2sXOFAdapter{x: x}), nil
+	return xof.Blake2s(length, key)
 }
 
 type blake2Hasher struct {
@@ -212,15 +198,3 @@ func (h blake2Hasher) Hash(msg []byte) []byte {
 }
 
 func (h blake2Hasher) Size() int { return h.size }
-
-type blake2bXOFAdapter struct{ x blake2b.XOF }
-
-func (x *blake2bXOFAdapter) Reset()                       { x.x.Reset() }
-func (x *blake2bXOFAdapter) Write(p []byte) (int, error)  { return x.x.Write(p) }
-func (x *blake2bXOFAdapter) Read(out []byte) (int, error) { return x.x.Read(out) }
-
-type blake2sXOFAdapter struct{ x blake2s.XOF }
-
-func (x *blake2sXOFAdapter) Reset()                       { x.x.Reset() }
-func (x *blake2sXOFAdapter) Write(p []byte) (int, error)  { return x.x.Write(p) }
-func (x *blake2sXOFAdapter) Read(out []byte) (int, error) { return x.x.Read(out) }

@@ -1,4 +1,4 @@
-package hash
+package xof
 
 import "cryptonite-go/internal/keccak"
 
@@ -29,8 +29,8 @@ func (x *shakeXOF) Reset() {
 }
 
 func newSHAKEXOF(rate int, ds byte) XOF {
-	return wrapXOF(newShakeXOF(rate, ds))
+	return newShakeXOF(rate, ds)
 }
 
-func NewSHAKE128() XOF { return newSHAKEXOF(168, 0x1f) }
-func NewSHAKE256() XOF { return newSHAKEXOF(136, 0x1f) }
+func SHAKE128() XOF { return newSHAKEXOF(168, 0x1f) }
+func SHAKE256() XOF { return newSHAKEXOF(136, 0x1f) }

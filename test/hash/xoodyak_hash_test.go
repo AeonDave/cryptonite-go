@@ -8,6 +8,7 @@ import (
 
 	cryptohash "cryptonite-go/hash"
 	testutil "cryptonite-go/test/internal/testutil"
+	"cryptonite-go/xof"
 )
 
 //go:embed testdata/xoodyak_hash_kat.txt
@@ -87,7 +88,7 @@ func TestXoodyak_Hash_XOF_KAT(t *testing.T) {
 			t.Fatalf("Hasher digest mismatch case %d", idx+1)
 		}
 		// XOF (64 bytes)
-		x := cryptohash.NewXoodyakXOF()
+		x := xof.Xoodyak()
 		if _, err := x.Write(tc.msg); err != nil {
 			t.Fatalf("xof write failed case %d: %v", idx+1, err)
 		}
@@ -99,7 +100,7 @@ func TestXoodyak_Hash_XOF_KAT(t *testing.T) {
 			t.Fatalf("xof mismatch case %d:\n got %x\nwant %x", idx+1, out, tc.xof)
 		}
 		// Multiple reads should continue the stream
-		x2 := cryptohash.NewXoodyakXOF()
+		x2 := xof.Xoodyak()
 		_, _ = x2.Write(tc.msg)
 		outA := make([]byte, 32)
 		outB := make([]byte, len(tc.xof)-32)
