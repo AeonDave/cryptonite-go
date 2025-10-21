@@ -105,3 +105,13 @@ func extract(state *[25]uint64, buf []byte) {
 		binary.LittleEndian.PutUint64(buf[i*8:], state[i])
 	}
 }
+
+// SumFixed absorbs msg into a fresh Keccak sponge with the provided
+// parameters and squeezes a fixed-length digest into out. The domain
+// separation byte must follow the conventions from NIST FIPS 202.
+func SumFixed(rate int, ds byte, out, msg []byte) {
+	var s Sponge
+	s.Init(rate, ds)
+	s.Absorb(msg)
+	s.Squeeze(out)
+}

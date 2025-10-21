@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	cryptohash "cryptonite-go/hash"
 	"cryptonite-go/hash/xoodyak"
 )
 
@@ -63,6 +64,27 @@ func TestXoodyak_Hash_XOF_KAT(t *testing.T) {
 		got := h.Sum(nil)
 		if !bytes.Equal(got, tc.md) {
 			t.Fatalf("hash mismatch case %d:\n got %x\nwant %x", idx+1, got, tc.md)
+		}
+		sum := xoodyak.Sum(tc.msg)
+		if !bytes.Equal(sum[:], tc.md) {
+			t.Fatalf("Sum mismatch case %d:\n got %x\nwant %x", idx+1, sum, tc.md)
+		}
+		streaming, ok := h.(cryptohash.Hasher)
+		if !ok {
+			t.Fatalf("xoodyak.Hash missing hash.Hasher implementation")
+		}
+		if streaming.Size() != len(tc.md) {
+			t.Fatalf("streaming Size mismatch case %d", idx+1)
+		}
+		if got := streaming.Hash(tc.msg); !bytes.Equal(got, tc.md) {
+			t.Fatalf("streaming Hash mismatch case %d", idx+1)
+		}
+		hasher := xoodyak.NewHasher()
+		if hasher.Size() != len(tc.md) {
+			t.Fatalf("Hasher size mismatch case %d", idx+1)
+		}
+		if got := hasher.Hash(tc.msg); !bytes.Equal(got, tc.md) {
+			t.Fatalf("Hasher digest mismatch case %d", idx+1)
 		}
 		// XOF (64 bytes)
 		x := xoodyak.NewXOF()
