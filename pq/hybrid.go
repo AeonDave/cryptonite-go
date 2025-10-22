@@ -175,13 +175,14 @@ func (h *Hybrid) Decapsulate(private, ciphertext []byte) ([]byte, error) {
 	if len(ctComponents.classical) == 0 {
 		return nil, errors.New("pq: missing classical ciphertext component")
 	}
-	if len(keyComponents.postQuantum) > 0 && h.mlkem == nil {
+	requirePQ := h.mlkem != nil
+	if len(keyComponents.postQuantum) > 0 && !requirePQ {
 		return nil, errors.New("pq: unexpected post-quantum key component")
 	}
-	if len(ctComponents.postQuantum) > 0 && h.mlkem == nil {
+	if len(ctComponents.postQuantum) > 0 && !requirePQ {
 		return nil, errors.New("pq: unexpected post-quantum ciphertext component")
 	}
-	if h.mlkem != nil {
+	if requirePQ {
 		if len(keyComponents.postQuantum) == 0 {
 			return nil, errMissingPQPrivate
 		}
@@ -204,7 +205,7 @@ func (h *Hybrid) Decapsulate(private, ciphertext []byte) ([]byte, error) {
 	}
 
 	var pqSecret []byte
-	if h.mlkem != nil {
+	if requirePQ {
 		pqSecret, err = h.mlkem.Decapsulate(keyComponents.postQuantum, ctComponents.postQuantum)
 		if err != nil {
 			secret.WipeBytes(classicalSecret)

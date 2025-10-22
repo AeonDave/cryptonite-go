@@ -1,4 +1,4 @@
-package xoodyak_test
+package hash_test
 
 import (
 	"bytes"

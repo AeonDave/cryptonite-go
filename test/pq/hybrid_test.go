@@ -125,6 +125,58 @@ func TestHybridRejectsMissingPQMaterial(t *testing.T) {
 	}
 }
 
+func TestHybridDecapsulateMissingPQComponentsSkipsMLKEM(t *testing.T) {
+	stub := &stubKEM{
+		public:       []byte{0x01, 0x02},
+		private:      []byte{0x03, 0x04, 0x05},
+		ciphertext:   []byte{0xAA, 0xBB},
+		sharedSecret: []byte("pq-secret"),
+	}
+
+	hybrid, err := pq.NewHybrid(ecdh.New(), stub)
+	if err != nil {
+		t.Fatalf("NewHybrid: %v", err)
+	}
+
+	pub, priv, err := hybrid.GenerateKey()
+	if err != nil {
+		t.Fatalf("GenerateKey: %v", err)
+	}
+
+	ct, _, err := hybrid.Encapsulate(pub)
+	if err != nil {
+		t.Fatalf("Encapsulate: %v", err)
+	}
+
+	classicalPriv, _, err := parseHybridForTest(priv)
+	if err != nil {
+		t.Fatalf("parseHybridForTest(priv): %v", err)
+	}
+
+	truncatedPriv := encodeHybridForTest(classicalPriv, nil)
+	if _, err := hybrid.Decapsulate(truncatedPriv, ct); err == nil {
+		t.Fatal("Decapsulate succeeded with missing PQ private component")
+	}
+	if stub.decapsulateCalls != 0 {
+		t.Fatal("ML-KEM decapsulate invoked when PQ private component missing")
+	}
+
+	stub.decapsulateCalls = 0
+
+	classicalCT, _, err := parseHybridForTest(ct)
+	if err != nil {
+		t.Fatalf("parseHybridForTest(ct): %v", err)
+	}
+
+	truncatedCT := encodeHybridForTest(classicalCT, nil)
+	if _, err := hybrid.Decapsulate(priv, truncatedCT); err == nil {
+		t.Fatal("Decapsulate succeeded with missing PQ ciphertext component")
+	}
+	if stub.decapsulateCalls != 0 {
+		t.Fatal("ML-KEM decapsulate invoked when PQ ciphertext component missing")
+	}
+}
+
 func TestHybridWithPostQuantumStub(t *testing.T) {
 	stub := &stubKEM{
 		public:       []byte{0xAA, 0xBB},
@@ -242,10 +294,11 @@ func parseHybridForTest(b []byte) (classical, postQuantum []byte, err error) {
 }
 
 type stubKEM struct {
-	public       []byte
-	private      []byte
-	ciphertext   []byte
-	sharedSecret []byte
+	public           []byte
+	private          []byte
+	ciphertext       []byte
+	sharedSecret     []byte
+	decapsulateCalls int
 }
 
 func (s *stubKEM) GenerateKey() ([]byte, []byte, error) {
@@ -257,5 +310,6 @@ func (s *stubKEM) Encapsulate([]byte) ([]byte, []byte, error) {
 }
 
 func (s *stubKEM) Decapsulate([]byte, []byte) ([]byte, error) {
+	s.decapsulateCalls++
 	return append([]byte(nil), s.sharedSecret...), nil
 }
