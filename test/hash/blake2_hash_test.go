@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	stdhash "hash"
 	"io"
+	"math"
 	"strconv"
 	"strings"
 	"testing"
@@ -275,14 +276,17 @@ func testBlake2bXOF(t *testing.T, idx int, tc blake2Case) {
 
 func testBlake2sXOF(t *testing.T, idx int, tc blake2Case) {
 	t.Helper()
+
 	builder := cryptohash.NewBlake2sBuilder()
 	if len(tc.key) > 0 {
 		builder = builder.Key(tc.key)
 	}
+
 	length := uint32(tc.outLen)
 	if strings.EqualFold(tc.mode, "UNKNOWN") {
 		length = xof.Blake2sUnknown
 	}
+
 	x, err := builder.XOF(length)
 	if err != nil {
 		t.Fatalf("case %d: XOF constructor failed: %v", idx+1, err)
@@ -294,6 +298,7 @@ func testBlake2sXOF(t *testing.T, idx int, tc blake2Case) {
 	if !bytes.Equal(got, tc.md) {
 		t.Fatalf("case %d: XOF mismatch", idx+1)
 	}
+
 	x.Reset()
 	if _, err := x.Write(tc.msg); err != nil {
 		t.Fatalf("case %d: XOF write after reset failed: %v", idx+1, err)
@@ -301,6 +306,7 @@ func testBlake2sXOF(t *testing.T, idx int, tc blake2Case) {
 	if got2 := readXOF(t, x, tc.outLen); !bytes.Equal(got2, tc.md) {
 		t.Fatalf("case %d: XOF mismatch after reset", idx+1)
 	}
+
 	if !strings.EqualFold(tc.mode, "UNKNOWN") {
 		direct, err := xof.Blake2s(uint32(tc.outLen), tc.key)
 		if err != nil {
@@ -312,6 +318,22 @@ func testBlake2sXOF(t *testing.T, idx int, tc blake2Case) {
 		if got3 := readXOF(t, direct, tc.outLen); !bytes.Equal(got3, tc.md) {
 			t.Fatalf("case %d: direct XOF mismatch", idx+1)
 		}
+	}
+}
+func TestBlake2sBuilderXOFRejectsMaxUint16(t *testing.T) {
+	t.Parallel()
+
+	builder := cryptohash.NewBlake2sBuilder()
+	if _, err := builder.XOF(math.MaxUint16); err == nil {
+		t.Fatalf("expected error for 65535-byte output")
+	} else if !strings.Contains(err.Error(), "length too large") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if _, err := cryptohash.NewBlake2sXOF(math.MaxUint16, nil); err == nil {
+		t.Fatalf("expected error from NewBlake2sXOF for 65535-byte output")
+	} else if !strings.Contains(err.Error(), "length too large") {
+		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
