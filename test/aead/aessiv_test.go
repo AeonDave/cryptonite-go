@@ -68,7 +68,7 @@ func TestAESSIV_KnownVectors(t *testing.T) {
 			plaintext := decodeSpacedHex(t, tc.plaintext)
 			tag := decodeSpacedHex(t, tc.tag)
 			ciphertext := decodeSpacedHex(t, tc.ciphertext)
-			expected := append(append([]byte(nil), ciphertext...), tag...)
+			expected := append(append([]byte(nil), tag...), ciphertext...)
 
 			switch {
 			case tc.useMulti:

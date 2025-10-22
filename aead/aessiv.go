@@ -77,10 +77,10 @@ func (a aesSIV) encryptWithAssociatedData(key, nonce []byte, ad [][]byte, plaint
 	clearSIVCounterBits(counter[:])
 	stream := cipher.NewCTR(block, counter[:])
 	result := make([]byte, len(plaintext)+aesSIVTagSize)
+	copy(result[:aesSIVTagSize], synthetic[:])
 	if len(plaintext) > 0 {
-		stream.XORKeyStream(result[:len(plaintext)], plaintext)
+		stream.XORKeyStream(result[aesSIVTagSize:], plaintext)
 	}
-	copy(result[len(plaintext):], synthetic[:])
 	return result, nil
 }
 
@@ -93,9 +93,8 @@ func (a aesSIV) decryptWithAssociatedData(key, nonce []byte, ad [][]byte, cipher
 	}
 	macKey := key[:len(key)/2]
 	encKey := key[len(key)/2:]
-	tagPos := len(ciphertextAndTag) - aesSIVTagSize
-	tag := ciphertextAndTag[tagPos:]
-	ciphertext := ciphertextAndTag[:tagPos]
+	tag := ciphertextAndTag[:aesSIVTagSize]
+	ciphertext := ciphertextAndTag[aesSIVTagSize:]
 	block, err := aes.NewCipher(encKey)
 	if err != nil {
 		return nil, err
