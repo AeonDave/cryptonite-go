@@ -315,6 +315,34 @@ func testBlake2sXOF(t *testing.T, idx int, tc blake2Case) {
 	}
 }
 
+func TestBlake2HasherRejectsOversizedKey(t *testing.T) {
+	t.Parallel()
+
+	t.Run("blake2b", func(t *testing.T) {
+		t.Parallel()
+		const (
+			digestSize = 64
+			maxKeySize = 64
+		)
+		oversizedKey := make([]byte, maxKeySize+1)
+		if _, err := cryptohash.NewBlake2bHasher(digestSize, oversizedKey); err == nil {
+			t.Fatalf("expected error for key length %d", len(oversizedKey))
+		}
+	})
+
+	t.Run("blake2s", func(t *testing.T) {
+		t.Parallel()
+		const (
+			digestSize = 32
+			maxKeySize = 32
+		)
+		oversizedKey := make([]byte, maxKeySize+1)
+		if _, err := cryptohash.NewBlake2sHasher(digestSize, oversizedKey); err == nil {
+			t.Fatalf("expected error for key length %d", len(oversizedKey))
+		}
+	})
+}
+
 func readXOF(t *testing.T, x xof.XOF, length int) []byte {
 	t.Helper()
 	out := make([]byte, length)
