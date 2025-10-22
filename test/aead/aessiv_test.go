@@ -174,3 +174,36 @@ func TestAESSIV_TagTamper(t *testing.T) {
 		t.Fatalf("decrypt succeeded on tampered tag")
 	}
 }
+
+func TestAESSIV_TooManyAssociatedDataComponents(t *testing.T) {
+	cipher := aead.NewAES128SIV()
+	multi, hasMulti := cipher.(aead.MultiAssociatedData)
+	if !hasMulti {
+		t.Fatal("aesSIV does not implement multi-associated-data interface")
+	}
+
+	key := make([]byte, 32)
+	nonce := []byte("nonce")
+	pt := []byte("secret message")
+
+	// Per RFC 5297, Section 7, the number of AD components must not
+	// exceed 126.
+	ad := make([][]byte, 127)
+	for i := range ad {
+		ad[i] = []byte("ad")
+	}
+
+	if _, err := multi.EncryptWithAssociatedData(key, nonce, ad, pt); err == nil {
+		t.Fatalf("EncryptWithAssociatedData: expected error for too many AD components, got nil")
+	}
+
+	// Also test the decrypt path. It requires a valid ciphertext.
+	ct, err := cipher.Encrypt(key, nonce, ad[0], pt)
+	if err != nil {
+		t.Fatalf("setup: Encrypt failed: %v", err)
+	}
+
+	if _, err := multi.DecryptWithAssociatedData(key, nonce, ad, ct); err == nil {
+		t.Fatalf("DecryptWithAssociatedData: expected error for too many AD components, got nil")
+	}
+}
