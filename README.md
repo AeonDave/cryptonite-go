@@ -127,17 +127,33 @@ Block primitives are instantiated through `block.NewAES128` / `block.NewAES256`,
 
 ### Post-quantum key encapsulation
 
-The `pq` package defines a shared `pq.KEM` interface and ships with a deployable
-hybrid construction combining the existing X25519 ECDH helper with an optional
-post-quantum primitive. The default constructor, `pq.NewHybridX25519()`, emits
-keys and ciphertexts encoded as a version tag plus two length-prefixed
-components (classical and PQ). Until an ML-KEM implementation lands, the hybrid
-construction uses only the classical X25519 shared secret and derives the final
-session key via HKDF-SHA256 following the guidance from
-[draft-ietf-tls-hybrid-design](https://datatracker.ietf.org/doc/html/draft-ietf-tls-hybrid-design-05).
+The `pq` package defines a shared `pq.KEM` interface together with a deployable
+hybrid construction:
 
-Once ML-KEM is available, it can be injected through `pq.NewHybrid` to provide a
-drop-in post-quantum upgrade without changing call sites or encoded formats.
+* `kem/x25519.New()` — classical KEM adapter built on top of the existing
+  `ecdh` helpers (deployable today, pure Go, stdlib only). The adapter lives in
+  its own package to highlight that it provides classical security and can be
+  reused by non-PQ code paths.
+* `pq.NewHybridX25519()` — versioned hybrid format that composes the X25519
+  exchange with an optional ML-KEM component. Callers can inject a vetted ML-KEM
+  implementation via `pq.NewHybrid(classical, mlkem)` without changing encoded
+  formats or downstream APIs.
+
+Key material and ciphertexts produced by the hybrid construction are encoded as
+`version || len(classical) || classical || len(pq) || pq`, providing forwards
+compatibility when the PQ component is introduced.
+
+To encrypt payloads, the package also includes the convenience `pq.Seal` and
+`pq.Open` helpers which perform the standard `KEM → HKDF → AEAD` flow. The
+envelope format embeds the encapsulated key (length-prefixed), a key-schedule
+identifier, and the AEAD ciphertext so that the receiver can deterministically
+reproduce the derived key/nonce pair. The key schedule currently covers modern
+AEADs such as ChaCha20-Poly1305, AES-256-GCM, AES-GCM-SIV, XChaCha20-Poly1305,
+ASCON-128a, Deoxys-II-256-128, and the AES-SIV family.
+
+Symmetric protection remains classical (AEAD); only the key agreement layer is
+made hybrid/PQ-ready following the recommendations from
+[draft-ietf-tls-hybrid-design](https://datatracker.ietf.org/doc/html/draft-ietf-tls-hybrid-design-05).
 
 ## API
 
@@ -172,13 +188,13 @@ KEM interface in `pq/pq.go`:
 
 ```go
 type KEM interface {
-        GenerateKey(rand io.Reader) (public, private []byte, err error)
-        Encapsulate(rand io.Reader, public []byte) (ciphertext, sharedSecret []byte, err error)
+        GenerateKey() (public, private []byte, err error)
+        Encapsulate(public []byte) (ciphertext, sharedSecret []byte, err error)
         Decapsulate(private []byte, ciphertext []byte) ([]byte, error)
 }
 ```
 
-- `GenerateKey` derives a deterministic public key from freshly generated private key material.
+- `GenerateKey` derives a deterministic public key from freshly generated private key material using `crypto/rand` internally.
 - `Encapsulate` produces a ciphertext and shared secret for the provided public key.
 - `Decapsulate` recovers the shared secret from the ciphertext and recipient private key.
 

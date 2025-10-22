@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"errors"
-	"io"
 
 	"github.com/AeonDave/cryptonite-go/ecdh"
 	"github.com/AeonDave/cryptonite-go/kdf"
@@ -56,13 +55,11 @@ func NewHybridX25519() *Hybrid {
 // GenerateKey creates a hybrid public/private key pair. When mlkem is nil only
 // the classical component is produced, resulting in a format that still allows
 // hybrid ciphertexts to be processed in the future.
-func (h *Hybrid) GenerateKey(rand io.Reader) (public, private []byte, err error) {
+func (h *Hybrid) GenerateKey() (public, private []byte, err error) {
 	if h == nil {
 		return nil, nil, errors.New("pq: nil hybrid")
 	}
-	randSrc := readerOrDefault(rand)
-
-	classicalPriv, err := h.classical.Curve().GenerateKey(randSrc)
+	classicalPriv, err := h.classical.Curve().GenerateKey(rand.Reader)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -71,7 +68,7 @@ func (h *Hybrid) GenerateKey(rand io.Reader) (public, private []byte, err error)
 
 	var mlkemPub, mlkemPriv []byte
 	if h.mlkem != nil {
-		mlkemPub, mlkemPriv, err = h.mlkem.GenerateKey(randSrc)
+		mlkemPub, mlkemPriv, err = h.mlkem.GenerateKey()
 		if err != nil {
 			secret.WipeBytes(classicalPrivBytes)
 			secret.WipeBytes(classicalPub)
@@ -90,7 +87,7 @@ func (h *Hybrid) GenerateKey(rand io.Reader) (public, private []byte, err error)
 // The returned ciphertext embeds the ephemeral classical public key and, when
 // available, the post-quantum ciphertext. The shared secret is derived from the
 // concatenation of the classical and PQ secrets using HKDF-SHA256.
-func (h *Hybrid) Encapsulate(rand io.Reader, public []byte) (ciphertext, sharedSecret []byte, err error) {
+func (h *Hybrid) Encapsulate(public []byte) (ciphertext, sharedSecret []byte, err error) {
 	if h == nil {
 		return nil, nil, errors.New("pq: nil hybrid")
 	}
@@ -108,8 +105,7 @@ func (h *Hybrid) Encapsulate(rand io.Reader, public []byte) (ciphertext, sharedS
 		return nil, nil, errors.New("pq: unexpected post-quantum key component")
 	}
 
-	randSrc := readerOrDefault(rand)
-	classicalPriv, err := h.classical.Curve().GenerateKey(randSrc)
+	classicalPriv, err := h.classical.Curve().GenerateKey(rand.Reader)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -125,7 +121,7 @@ func (h *Hybrid) Encapsulate(rand io.Reader, public []byte) (ciphertext, sharedS
 
 	var pqCiphertext, pqSecret []byte
 	if h.mlkem != nil {
-		pqCiphertext, pqSecret, err = h.mlkem.Encapsulate(randSrc, components.postQuantum)
+		pqCiphertext, pqSecret, err = h.mlkem.Encapsulate(components.postQuantum)
 		if err != nil {
 			secret.WipeBytes(classicalSecret)
 			return nil, nil, err
@@ -263,11 +259,4 @@ func combineSharedSecrets(classical, postQuantum []byte) ([]byte, error) {
 	out, err := kdf.HKDFSHA256(ikm, nil, []byte("cryptonite-go/hybrid"), hybridSecretSize)
 	secret.WipeBytes(ikm)
 	return out, err
-}
-
-func readerOrDefault(r io.Reader) io.Reader {
-	if r != nil {
-		return r
-	}
-	return rand.Reader
 }
