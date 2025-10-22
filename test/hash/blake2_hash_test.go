@@ -368,6 +368,113 @@ func TestBlake2HasherRejectsOversizedKeys(t *testing.T) {
 	}
 }
 
+func TestBlake2RejectsInvalidDigestSizes(t *testing.T) {
+	t.Parallel()
+
+	const errInvalidDigest = "hash: invalid BLAKE2 digest size"
+
+	type constructor struct {
+		name string
+		make func(size int) error
+	}
+
+	cases := []struct {
+		name         string
+		maxSize      int
+		constructors []constructor
+	}{
+		{
+			name:    "BLAKE2b",
+			maxSize: 64,
+			constructors: []constructor{
+				{
+					name: "NewHasher",
+					make: func(size int) error {
+						_, err := cryptohash.NewBlake2bHasher(size, nil)
+						return err
+					},
+				},
+				{
+					name: "BuilderHasher",
+					make: func(size int) error {
+						_, err := cryptohash.NewBlake2bBuilder().Size(size).Hasher()
+						return err
+					},
+				},
+				{
+					name: "BuilderSum",
+					make: func(size int) error {
+						_, err := cryptohash.NewBlake2bBuilder().Size(size).Sum(nil)
+						return err
+					},
+				},
+			},
+		},
+		{
+			name:    "BLAKE2s",
+			maxSize: 32,
+			constructors: []constructor{
+				{
+					name: "NewHasher",
+					make: func(size int) error {
+						_, err := cryptohash.NewBlake2sHasher(size, nil)
+						return err
+					},
+				},
+				{
+					name: "BuilderHasher",
+					make: func(size int) error {
+						_, err := cryptohash.NewBlake2sBuilder().Size(size).Hasher()
+						return err
+					},
+				},
+				{
+					name: "BuilderSum",
+					make: func(size int) error {
+						_, err := cryptohash.NewBlake2sBuilder().Size(size).Sum(nil)
+						return err
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			invalidSizes := []struct {
+				name string
+				size int
+			}{
+				{name: "Zero", size: 0},
+				{name: "TooLarge", size: tc.maxSize + 1},
+			}
+
+			for _, sizeCase := range invalidSizes {
+				sizeCase := sizeCase
+				t.Run(sizeCase.name, func(t *testing.T) {
+					t.Parallel()
+					for _, ctor := range tc.constructors {
+						ctor := ctor
+						t.Run(ctor.name, func(t *testing.T) {
+							t.Parallel()
+							err := ctor.make(sizeCase.size)
+							if err == nil {
+								t.Fatalf("expected error for %s size %d", tc.name, sizeCase.size)
+							}
+							if err.Error() != errInvalidDigest {
+								t.Fatalf("expected %q, got %q", errInvalidDigest, err.Error())
+							}
+						})
+					}
+				})
+			}
+		})
+	}
+}
+
 func TestBlake2HasherAcceptsMaximumKeys(t *testing.T) {
 	t.Parallel()
 	cases := []struct {
