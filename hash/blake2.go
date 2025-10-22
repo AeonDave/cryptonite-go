@@ -145,7 +145,7 @@ func (b Blake2sBuilder) Sum(msg []byte) ([]byte, error) {
 // XOF returns an extendable-output function using the configured key and the
 // requested output length. For unknown-length output use Blake2sXOFUnknown.
 func (b Blake2sBuilder) XOF(length uint32) (xof.XOF, error) {
-	if length != Blake2sXOFUnknown && length > math.MaxUint16 {
+	if length != Blake2sXOFUnknown && length >= math.MaxUint16 {
 		return nil, errors.New("hash: blake2s XOF length too large")
 	}
 	return xof.Blake2s(length, b.key)
@@ -165,7 +165,7 @@ func NewBlake2sHasher(size int, key []byte) (Hasher, error) {
 
 // Deprecated: use xof.Blake2s.
 func NewBlake2sXOF(length uint32, key []byte) (xof.XOF, error) {
-	if length != Blake2sXOFUnknown && length > math.MaxUint16 {
+	if length != Blake2sXOFUnknown && length >= math.MaxUint16 {
 		return nil, errors.New("hash: blake2s XOF length too large")
 	}
 	return xof.Blake2s(length, key)
