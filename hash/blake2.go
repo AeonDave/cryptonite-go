@@ -181,6 +181,9 @@ func newBlake2Hasher(newFunc func(int, []byte) (stdhash.Hash, error), maxSize, s
 	if size <= 0 || size > maxSize {
 		return nil, errors.New("hash: invalid BLAKE2 digest size")
 	}
+	if len(key) > maxSize {
+		return nil, errors.New("hash: BLAKE2 key too long")
+	}
 	dup := make([]byte, len(key))
 	copy(dup, key)
 	return blake2Hasher{size: size, key: dup, maxSize: maxSize, newFunc: newFunc}, nil
