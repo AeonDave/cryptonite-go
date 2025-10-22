@@ -125,6 +125,20 @@ Block primitives are instantiated through `block.NewAES128` / `block.NewAES256`,
 | P-256     | `ecdh.NewP256()` | 65 B (uncompressed) | 32 B scalar | 32 B   | Uncompressed public: 0x04 || X || Y |
 | P-384     | `ecdh.NewP384()` | 97 B (uncompressed) | 48 B scalar | 48 B   | Uncompressed public: 0x04 || X || Y |
 
+### Post-quantum key encapsulation
+
+The `pq` package defines a shared `pq.KEM` interface and ships with a deployable
+hybrid construction combining the existing X25519 ECDH helper with an optional
+post-quantum primitive. The default constructor, `pq.NewHybridX25519()`, emits
+keys and ciphertexts encoded as a version tag plus two length-prefixed
+components (classical and PQ). Until an ML-KEM implementation lands, the hybrid
+construction uses only the classical X25519 shared secret and derives the final
+session key via HKDF-SHA256 following the guidance from
+[draft-ietf-tls-hybrid-design](https://datatracker.ietf.org/doc/html/draft-ietf-tls-hybrid-design-05).
+
+Once ML-KEM is available, it can be injected through `pq.NewHybrid` to provide a
+drop-in post-quantum upgrade without changing call sites or encoded formats.
+
 ## API
 
 Common interface in `aead/aead.go`:
@@ -143,8 +157,8 @@ Hash helper interface in `hash/hash.go`:
 
 ```go
 type Hasher interface {
-Hash(msg []byte) []byte
-Size() int
+        Hash(msg []byte) []byte
+        Size() int
 }
 ```
 
@@ -153,6 +167,20 @@ Size() int
 - SHA-3 and Xoodyak helpers under `hash` expose both streaming constructors (e.g. `hash.NewSHA3256()`, `hash.NewXoodyak()`) and
   single-shot helpers (`hash.NewSHA3256Hasher()`, `hash.NewXoodyakHasher()`, `hash.Sum*`, `hash.SumXoodyak`) that satisfy
   `hash.Hasher`.
+
+KEM interface in `pq/pq.go`:
+
+```go
+type KEM interface {
+        GenerateKey(rand io.Reader) (public, private []byte, err error)
+        Encapsulate(rand io.Reader, public []byte) (ciphertext, sharedSecret []byte, err error)
+        Decapsulate(private []byte, ciphertext []byte) ([]byte, error)
+}
+```
+
+- `GenerateKey` derives a deterministic public key from freshly generated private key material.
+- `Encapsulate` produces a ciphertext and shared secret for the provided public key.
+- `Decapsulate` recovers the shared secret from the ciphertext and recipient private key.
 
 ## Examples
 
