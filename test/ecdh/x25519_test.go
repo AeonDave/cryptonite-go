@@ -2,9 +2,10 @@ package ecdh_test
 
 import (
 	"bytes"
+	"testing"
+
 	xdh "github.com/AeonDave/cryptonite-go/ecdh"
 	"github.com/AeonDave/cryptonite-go/test/internal/testutil"
-	"testing"
 )
 
 func TestX25519RFC7748Vectors(t *testing.T) {

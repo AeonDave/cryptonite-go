@@ -18,8 +18,10 @@ This Agents.md file provides comprehensive guidance for AI agents working with t
 - `/pq`: Post-quantum KEMs and signatures, including hybrid constructions.
 - `/secret`: Helpers for secret material management, including symmetric keys, nonces, and counters.
 - `/internal`: Internal implementations and primitives shared across packages (e.g., BLAKE2b, ChaCha20, Keccak).
-- `/test`: Test suites with known-answer tests, Wycheproof vectors, and fuzzing harnesses. Each package has its own tests with /testdata test vectors.
-- `/`: Root files include `go.mod` (specifies Go 1.22+ and module path), `README.md` (documentation and examples), `LICENSE`, and `.gitignore`.
+- `/test`: Test suites with known-answer tests, Wycheproof vectors, and fuzzing harnesses. Each package has its own
+  tests with /testdata test vectors.
+- `/`: Root files include `go.mod` (specifies Go 1.22+ and module path), `README.md` (documentation and examples),
+  `LICENSE`, and `.gitignore`.
 
 ## Coding Conventions for AI Agents
 
@@ -101,4 +103,5 @@ gofmt -d .
 go test ./...
 ```
 
-All checks must pass before AI agent-generated code can be merged. Agents.md helps ensure AI agents follow these requirements for security and correctness.
+All checks must pass before AI agent-generated code can be merged. Agents.md helps ensure AI agents follow these
+requirements for security and correctness.

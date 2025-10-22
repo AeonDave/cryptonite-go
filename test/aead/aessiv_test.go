@@ -116,7 +116,7 @@ func TestAESSIV_KnownVectors(t *testing.T) {
 	}
 }
 
-func TestAESSIV_TagTamper(t *testing.T) {
+func TestAESSIV_CiphertextTamper(t *testing.T) {
 	cipher := aead.NewAES128SIV()
 	key := make([]byte, 32)
 	nonce := []byte("nonce")
@@ -132,6 +132,45 @@ func TestAESSIV_TagTamper(t *testing.T) {
 	tampered[len(tampered)-1] ^= 0x01
 
 	if _, err := cipher.Decrypt(key, nonce, ad, tampered); err == nil {
+		t.Fatalf("decrypt succeeded on tampered ciphertext")
+	}
+}
+
+func TestAESSIV_OutputFormat(t *testing.T) {
+	cipher := aead.NewAES128SIV()
+	key := make([]byte, 32)
+	pt := []byte("a secret message")
+
+	ct, err := cipher.Encrypt(key, nil, nil, pt)
+	if err != nil {
+		t.Fatalf("encrypt failed: %v", err)
+	}
+
+	tag := ct[:16]
+	ciphertext := ct[16:]
+
+	// Reconstruct and check for equality.
+	expected := append(tag, ciphertext...)
+	if !bytes.Equal(ct, expected) {
+		t.Fatalf("output format is not tag || ciphertext")
+	}
+}
+
+func TestAESSIV_TagTamper(t *testing.T) {
+	cipher := aead.NewAES128SIV()
+	key := make([]byte, 32)
+	pt := []byte("a secret message")
+
+	ct, err := cipher.Encrypt(key, nil, nil, pt)
+	if err != nil {
+		t.Fatalf("encrypt failed: %v", err)
+	}
+
+	// Tamper with the tag.
+	tampered := append([]byte(nil), ct...)
+	tampered[0] ^= 0x01
+
+	if _, err := cipher.Decrypt(key, nil, nil, tampered); err == nil {
 		t.Fatalf("decrypt succeeded on tampered tag")
 	}
 }

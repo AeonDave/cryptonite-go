@@ -2,9 +2,10 @@ package sig_test
 
 import (
 	"bytes"
+	"testing"
+
 	sig "github.com/AeonDave/cryptonite-go/sig"
 	"github.com/AeonDave/cryptonite-go/test/internal/testutil"
-	"testing"
 )
 
 func TestX25519RFC8032Vector(t *testing.T) {

@@ -2,9 +2,10 @@ package ecdh_test
 
 import (
 	"bytes"
+	"testing"
+
 	p256 "github.com/AeonDave/cryptonite-go/ecdh"
 	"github.com/AeonDave/cryptonite-go/test/internal/testutil"
-	"testing"
 )
 
 func TestP256KnownVector(t *testing.T) {

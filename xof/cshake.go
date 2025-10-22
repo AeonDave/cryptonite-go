@@ -3,8 +3,8 @@ package xof
 import "github.com/AeonDave/cryptonite-go/internal/keccak"
 
 const (
-        domainCSHAKE byte = 0x04
-        domainSHAKE  byte = 0x1f
+	domainCSHAKE byte = 0x04
+	domainSHAKE  byte = 0x1f
 )
 
 // cshakeXOF implements the extendable-output functionality for cSHAKE128/256.
@@ -64,9 +64,9 @@ func CSHAKE256(functionName, customization []byte) XOF {
 // name (N) and customization string (S), producing outLen bytes of output.
 func SumCSHAKE128(functionName, customization, msg []byte, outLen int) []byte {
 	x := newCSHAKEXOF(168, cloneBytes(functionName), cloneBytes(customization))
-	x.Write(msg)
+	_, _ = x.Write(msg)
 	out := make([]byte, outLen)
-	x.Read(out)
+	_, _ = x.Read(out)
 	return out
 }
 
@@ -74,9 +74,9 @@ func SumCSHAKE128(functionName, customization, msg []byte, outLen int) []byte {
 // name (N) and customization string (S), producing outLen bytes of output.
 func SumCSHAKE256(functionName, customization, msg []byte, outLen int) []byte {
 	x := newCSHAKEXOF(136, cloneBytes(functionName), cloneBytes(customization))
-	x.Write(msg)
+	_, _ = x.Write(msg)
 	out := make([]byte, outLen)
-	x.Read(out)
+	_, _ = x.Read(out)
 	return out
 }
 
