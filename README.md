@@ -159,6 +159,27 @@ reproduce the derived key/nonce pair. The key schedule currently covers modern
 AEADs such as ChaCha20-Poly1305, AES-256-GCM, AES-GCM-SIV, XChaCha20-Poly1305,
 ASCON-128a, Deoxys-II-256-128, and the AES-SIV family.
 
+## Benchmarks
+
+All algorithms in the repository ship with Go benchmark harnesses located under
+the `test` directory. To gather benchmark numbers (including allocation
+profiles) for every category, run:
+
+```bash
+go test ./test/... -bench=. -benchmem
+```
+
+You can scope the command to a specific family when needed, for example:
+
+```bash
+go test ./test/aead -bench=. -benchmem
+go test ./test/hash -bench=. -benchmem
+```
+
+These commands exercise the encryption/decryption, hashing, KDF, MAC, stream,
+block, signature, ECDH, HPKE, post-quantum, and secret-management benchmarks
+added alongside the existing test vectors.
+
 Symmetric protection remains classical (AEAD); only the key agreement layer is
 made hybrid/PQ-ready following the recommendations from
 [draft-ietf-tls-hybrid-design](https://datatracker.ietf.org/doc/html/draft-ietf-tls-hybrid-design-05).
