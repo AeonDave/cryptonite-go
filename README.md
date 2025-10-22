@@ -35,6 +35,9 @@ go get github.com/AeonDave/cryptonite-go
 | Algorithm          | Constructor(s)                                 | Key       | Nonce               | Tag | Notes                                                                                    | RFC / Spec                                                                                                                             |
 |--------------------|------------------------------------------------|-----------|---------------------|-----|------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
 | ASCON-128a         | `aead.NewAscon128()`                           | 16B       | 16B                 | 16B | NIST LwC winner                                                                          | [FIPS 208](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.208.pdf)                                                                   |
+| ASCON-80pq         | `aead.NewAscon80pq()`                          | 20B       | 16B                 | 16B | PQ-hardened variant                                                                      | [FIPS 208](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.208.pdf)                                                                   |
+| GIFT-COFB          | `aead.NewGiftCofb()`                           | 16B       | 16B                 | 16B | Ultra-lightweight finalist                                                               | [IACR 2018/803](https://eprint.iacr.org/2018/803.pdf)                                           |
+| SKINNY-AEAD-M1     | `aead.NewSkinnyAead()`                         | 16B       | 16B                 | 16B | Tweakable block-cipher AEAD (128-bit tag)                                                | [NIST LwC Round 1 submission](https://csrc.nist.gov/CSRC/media/Projects/lightweight-cryptography/documents/round-1/submissions/SKINNY.pdf) |
 | Xoodyak-Encrypt    | `aead.NewXoodyak()`                            | 16B       | 16B                 | 16B | Cyclist mode                                                                             | [Xoodyak specification](https://keccak.team/files/Xoodyak-specification.pdf)                                                           |
 | ChaCha20-Poly1305  | `aead.NewChaCha20Poly1305()`                   | 32B       | 12B                 | 16B | RFC 8439 layout                                                                          | [RFC 8439](https://www.rfc-editor.org/rfc/rfc8439.html)                                                                                |
 | XChaCha20-Poly1305 | `aead.NewXChaCha20Poly1305()`                  | 32B       | 24B                 | 16B | Derives nonce via HChaCha20                                                              | [draft-irtf-cfrg-xchacha-03](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-xchacha-03)                                         |
@@ -211,7 +214,7 @@ Decapsulate(private []byte, ciphertext []byte) ([]byte, error)
 The packages are imported using the module path prefix (`cryptonite-go/...`). Below are two representative snippets; see
 the package documentation for more variants.
 
-### AEAD (ASCON-128a)
+### AEAD (ASCON-128a / ASCON-80pq)
 
 ```go
 package main
@@ -236,6 +239,8 @@ func main() {
 	fmt.Println(string(pt))
 }
 ```
+
+`aead.NewAscon80pq()` works identically but expects a 20-byte key and offers higher post-quantum security margins.
 
 ### Hashing (SHA3-256 single-shot)
 
