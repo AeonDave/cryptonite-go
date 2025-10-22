@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/AeonDave/cryptonite-go)](https://goreportcard.com/report/github.com/AeonDave/cryptonite-go)
 ![GitHub License](https://img.shields.io/github/license/AeonDave/cryptonite-go)
 
-Minimal, modern, ultra-fast, dependency-free cryptography library for Go, using only the standard library.
+Minimal, modern, ultra-fast, dependency-free cryptography go library, using only the standard library.
 
 ## Overview
 
@@ -158,59 +158,6 @@ identifier, and the AEAD ciphertext so that the receiver can deterministically
 reproduce the derived key/nonce pair. The key schedule currently covers modern
 AEADs such as ChaCha20-Poly1305, AES-256-GCM, AES-GCM-SIV, XChaCha20-Poly1305,
 ASCON-128a, Deoxys-II-256-128, and the AES-SIV family.
-
-## Benchmarks
-
-All algorithms in the repository ship with Go benchmark harnesses located under
-the `test` directory. To gather benchmark numbers (including allocation
-profiles) for every category, run:
-
-Shell
-```bash
-go test ./test/... -bench=. -benchmem
-```
-
-Powershell
-```bash
-go test ./test/... -run='^$' -bench . -benchmem -count=1
-```
-
-You can scope the command to a specific family when needed, for example:
-
-```bash
-go test ./test/aead -bench=. -benchmem
-go test ./test/hash -bench=. -benchmem
-```
-
-These commands exercise the encryption/decryption, hashing, KDF, MAC, stream,
-block, signature, ECDH, HPKE, post-quantum, and secret-management benchmarks
-added alongside the existing test vectors.
-
-Symmetric protection remains classical (AEAD); only the key agreement layer is
-made hybrid/PQ-ready following the recommendations from
-[draft-ietf-tls-hybrid-design](https://datatracker.ietf.org/doc/html/draft-ietf-tls-hybrid-design-05).
-
-## Performance Summary (AMD Ryzen 7, Go 1.22+)
-
-| Category   | Algorithm          | Encrypt/Hash  | MB/s   | Allocs/op             | Notes                |
-|------------|--------------------|---------------|--------|-----------------------|----------------------|
-| **AEAD**   | **AES-GCM**        | 1488 MB/s     | 0      | **1.5 GB/s**          | Hardware accelerated |
-| **AEAD**   | **ChaCha20-Poly**  | 178 MB/s      | 3      | Portable              |                      |
-| **AEAD**   | **ASCON-128a**     | **223 MB/s**  | 3      | **Lightweight champ** |
-| **AEAD**   | **Xoodyak**        | 212 MB/s      | 2      | IoT optimized         |
-| **AEAD**   | **AES-SIV**        | 442 MB/s      | 13     | Nonce-misuse safe     |
-| **Block**  | **AES-128**        | **1940 MB/s** | **0**  | AES-NI                |
-| **Hash**   | **BLAKE2b-512**    | **742 MB/s**  | 2      | **Fastest**           |
-| **Hash**   | **SHA3-256**       | 38 MB/s       | 1      | NIST standard         |
-| **XOF**    | **BLAKE2b XOF**    | **189 MB/s**  | 1      | Streaming champ       |
-| **KDF**    | **HKDF-SHA256**    | 27 MB/s       | 18     | Fast key derivation   |
-| **KDF**    | **Argon2id**       | 0.01 MB/s     | 19 MiB | Memory-hard           |
-| **MAC**    | **Poly1305**       | **3117 MB/s** | 4      | **Ultra-fast**        |
-| **Stream** | **ChaCha20**       | **224 MB/s**  | **0**  | Zero allocs           |
-| **Sig**    | **Ed25519 Verify** | 23 MB/s       | **0**  | Fastest signature     |
-| **ECDH**   | **X25519**         | 0.82 MB/s     | 1      | Key exchange          |
-
-**Full results**: [benchmark.md](https://github.com/AeonDave/cryptonite-go/blob/main/benchmark.md)
 
 ## API
 
@@ -504,12 +451,71 @@ fmt.Println(string(plaintext))
 Tests include KAT suites for ASCON, Xoodyak, ChaCha20‑Poly1305, AES-GCM-SIV, and AES-SIV (RFC 5297), plus tamper checks
 on tags and ciphertext.
 
-## Design principles
+## Benchmarks
 
-- Pure Go, stdlib‑only (e.g., `crypto/subtle`, `encoding/binary`, `math/bits`).
-- Explicit and readable code; no hidden dependencies.
-- Minimal, consistent API to ease composition and testing.
-- Simple output layout: `ciphertext || tag` across most implementations (AES-SIV uses `tag || ciphertext` per RFC 5297).
+All algorithms in the repository ship with Go benchmark harnesses located under
+the `test` directory. To gather benchmark numbers (including allocation
+profiles) for every category, run:
+
+Shell
+```bash
+go test ./test/... -bench=. -benchmem
+```
+
+Powershell
+```bash
+go test ./test/... -run='^$' -bench . -benchmem -count=1
+```
+
+You can scope the command to a specific family when needed, for example:
+
+```bash
+go test ./test/aead -bench=. -benchmem
+go test ./test/hash -bench=. -benchmem
+```
+
+These commands exercise the encryption/decryption, hashing, KDF, MAC, stream,
+block, signature, ECDH, HPKE, post-quantum, and secret-management benchmarks
+added alongside the existing test vectors.
+
+Symmetric protection remains classical (AEAD); only the key agreement layer is
+made hybrid/PQ-ready following the recommendations from
+[draft-ietf-tls-hybrid-design](https://datatracker.ietf.org/doc/html/draft-ietf-tls-hybrid-design-05).
+
+## Performance Summary (AMD Ryzen 7, Go 1.22+)
+
+| Category   | Algorithm          | Encrypt/Hash  | MB/s   | Allocs/op             | Notes                |
+|------------|--------------------|---------------|--------|-----------------------|----------------------|
+| **AEAD**   | **AES-GCM**        | 1488 MB/s     | 0      | **1.5 GB/s**          | Hardware accelerated |
+| **AEAD**   | **ChaCha20-Poly**  | 178 MB/s      | 3      | Portable              |                      |
+| **AEAD**   | **ASCON-128a**     | **223 MB/s**  | 3      | **Lightweight champ** |
+| **AEAD**   | **Xoodyak**        | 212 MB/s      | 2      | IoT optimized         |
+| **AEAD**   | **AES-SIV**        | 442 MB/s      | 13     | Nonce-misuse safe     |
+| **Block**  | **AES-128**        | **1940 MB/s** | **0**  | AES-NI                |
+| **Hash**   | **BLAKE2b-512**    | **742 MB/s**  | 2      | **Fastest**           |
+| **Hash**   | **SHA3-256**       | 38 MB/s       | 1      | NIST standard         |
+| **XOF**    | **BLAKE2b XOF**    | **189 MB/s**  | 1      | Streaming champ       |
+| **KDF**    | **HKDF-SHA256**    | 27 MB/s       | 18     | Fast key derivation   |
+| **KDF**    | **Argon2id**       | 0.01 MB/s     | 19 MiB | Memory-hard           |
+| **MAC**    | **Poly1305**       | **3117 MB/s** | 4      | **Ultra-fast**        |
+| **Stream** | **ChaCha20**       | **224 MB/s**  | **0**  | Zero allocs           |
+| **Sig**    | **Ed25519 Verify** | 23 MB/s       | **0**  | Fastest signature     |
+| **ECDH**   | **X25519**         | 0.82 MB/s     | 1      | Key exchange          |
+
+**Full results**: [benchmark.md](https://github.com/AeonDave/cryptonite-go/blob/main/benchmark.md)
+
+## Performance Highlights
+
+- **3+ GB/s** MAC operations (Poly1305)
+- **1.6+ GB/s** authenticated encryption (AES-GCM)
+- **800+ MB/s** cryptographic hashing (BLAKE2b)
+- **Zero allocations** on critical paths (AES, ChaCha20, Ed25519 verify)
+- **Pure Go** - no CGO, cross-compile anywhere
+
+### Unique Algorithm Support
+- **ASCON-128a**: 225 MB/s (NIST Lightweight Crypto winner)
+- **Xoodyak**: 216 MB/s (IoT-optimized AEAD)
+- Rare algorithms: DeoxysII, GIFT-COFB, SkinnyAead
 
 ## Security and limitations
 
