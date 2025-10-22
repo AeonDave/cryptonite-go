@@ -47,8 +47,8 @@ func (a aesSIV) Decrypt(key, nonce, ad, ciphertextAndTag []byte) ([]byte, error)
 }
 
 // EncryptWithAssociatedData accepts an arbitrary number of associated data
-// components. The nonce, when provided, is treated as the first component per
-// RFC 5297.
+// components. The nonce, when provided, is treated as the final associated
+// string before the plaintext, matching Section 3 of RFC 5297.
 func (a aesSIV) EncryptWithAssociatedData(key, nonce []byte, ad [][]byte, plaintext []byte) ([]byte, error) {
 	return a.encryptWithAssociatedData(key, nonce, ad, plaintext)
 }
@@ -119,14 +119,14 @@ func (a aesSIV) decryptWithAssociatedData(key, nonce []byte, ad [][]byte, cipher
 }
 
 func computeS2V(macKey, nonce []byte, ad [][]byte, plaintext []byte) ([aesSIVTagSize]byte, error) {
-	var adList [][]byte
+	components := make([][]byte, 0, len(ad)+1)
 	if len(ad) > 0 {
-		adList = append(adList, ad...)
+		components = append(components, ad...)
 	}
 	if nonce != nil {
-		adList = append(adList, nonce)
+		components = append(components, nonce)
 	}
-	return s2v(macKey, adList, plaintext)
+	return s2v(macKey, components, plaintext)
 }
 
 func s2v(macKey []byte, ad [][]byte, plaintext []byte) ([aesSIVTagSize]byte, error) {
