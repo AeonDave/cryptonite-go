@@ -157,3 +157,52 @@ func TestCSHAKEReset(t *testing.T) {
 		t.Fatalf("Reset produced inconsistent output")
 	}
 }
+
+func TestCSHAKEDowngradesToSHAKE(t *testing.T) {
+	msg := []byte("downgrade message")
+	tests := []struct {
+		name   string
+		cshake func() xof.XOF
+		shake  func() xof.XOF
+	}{
+		{
+			name:   "128",
+			cshake: func() xof.XOF { return xof.CSHAKE128(nil, nil) },
+			shake:  xof.SHAKE128,
+		},
+		{
+			name:   "256",
+			cshake: func() xof.XOF { return xof.CSHAKE256(nil, nil) },
+			shake:  xof.SHAKE256,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			cs := tt.cshake()
+			sh := tt.shake()
+
+			if _, err := cs.Write(msg); err != nil {
+				t.Fatalf("cSHAKE Write failed: %v", err)
+			}
+			if _, err := sh.Write(msg); err != nil {
+				t.Fatalf("SHAKE Write failed: %v", err)
+			}
+
+			outCSHAKE := make([]byte, 64)
+			outSHAKE := make([]byte, 64)
+
+			if _, err := cs.Read(outCSHAKE); err != nil {
+				t.Fatalf("cSHAKE Read failed: %v", err)
+			}
+			if _, err := sh.Read(outSHAKE); err != nil {
+				t.Fatalf("SHAKE Read failed: %v", err)
+			}
+
+			if !bytes.Equal(outCSHAKE, outSHAKE) {
+				t.Fatalf("uncustomized cSHAKE output mismatch for SHAKE%s", tt.name)
+			}
+		})
+	}
+}

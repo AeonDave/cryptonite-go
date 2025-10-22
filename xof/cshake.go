@@ -2,7 +2,10 @@ package xof
 
 import "github.com/AeonDave/cryptonite-go/internal/keccak"
 
-const domainCSHAKE = 0x04
+const (
+        domainCSHAKE byte = 0x04
+        domainSHAKE  byte = 0x1f
+)
 
 // cshakeXOF implements the extendable-output functionality for cSHAKE128/256.
 type cshakeXOF struct {
@@ -35,7 +38,11 @@ func (x *cshakeXOF) Read(out []byte) (int, error) {
 }
 
 func (x *cshakeXOF) Reset() {
-	x.sponge.Init(x.rate, domainCSHAKE)
+	domain := domainCSHAKE
+	if len(x.prefix) == 0 {
+		domain = domainSHAKE
+	}
+	x.sponge.Init(x.rate, domain)
 	if len(x.prefix) > 0 {
 		x.sponge.Absorb(x.prefix)
 	}
