@@ -4,25 +4,17 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/AeonDave/cryptonite-go)](https://goreportcard.com/report/github.com/AeonDave/cryptonite-go)
 ![GitHub License](https://img.shields.io/github/license/AeonDave/cryptonite-go)
 
-Minimal, dependency-free cryptography library in Go implemented using only the standard library.
+Minimal, modern, dependency-free cryptography library for Go, using only the standard library.
 
-- Pure Go, stdlib-only implementations with no third-party dependencies.
-- Shared internal primitives (Keccak sponge, Xoodoo permutation, AES, etc.) reused across packages to minimise the
-  attack surface.
-- Consistent AEAD and hashing APIs, including single-shot helpers via `hash.Hasher`, plus reusable KDF, signature, and
-  ECDH layers.
-- HPKE base mode (RFC 9180) with X25519, HKDF-SHA256, and both ChaCha20-Poly1305 and AES-128-GCM cipher suites.
-- Extensive known-answer tests, spec-aligned constants (e.g. NIST FIPS 202 for SHA-3/SHAKE), and selective zeroisation
-  of sensitive buffers.
-- Secret key/nonce wrappers (`secret` package) provide typed buffers with best-effort zeroisation and monotonic 96/192-bit counters.
-- Wycheproof-inspired regression suites and `testing/fuzz` harnesses for AES-GCM and ChaCha20-Poly1305 to protect against regressions.
-- Uniform ciphertext layout for AEAD constructions (`ciphertext || tag`) and deterministic test fixtures for
-  reproducibility.
-- AES-SIV exposes optional multi-associated-data helpers so callers can supply the full vector of strings defined by RFC
-  5297.
+## Overview
+- Small and auditable: pure Go, no third-party dependencies, making code review and security inspections straightforward.
+- Reduced attack surface: shared, well-tested internal primitives and minimal cross-package APIs.
+- Consistent, ergonomic interfaces: uniform AEAD, hashing, KDF, signature, and ECDH APIs for easy composition.
+- Practical security defaults: spec-aligned choices, selective zeroisation of sensitive buffers, and attention to constant-time behavior where required.
+- Robust test coverage and regression protection: known-answer tests, Wycheproof-inspired suites, and fuzzing harnesses.
+- Interoperability for real-world use: implements widely used constructions (HPKE, X25519, Ed25519, AES, ChaCha20-Poly1305, etc.) without exposing low-level implementation details.
 
 ## Requirements
-
 - Go 1.22+
 
 ## Installation
@@ -63,10 +55,10 @@ the Go `hash.Hash` type without importing algorithm-specific subpackages.
 
 #### SP 800-185 constructions
 
-| Algorithm            | Helper(s)                                                               | Notes                                         |
-|----------------------|-------------------------------------------------------------------------|-----------------------------------------------|
-| TupleHash128 / 256   | `hash.TupleHash128(tuple, outLen, customization)` / `hash.TupleHash256` | Tuple of byte-strings, optional customization |
-| ParallelHash128 / 256| `hash.ParallelHash128(msg, blockSize, outLen, customization)` / `hash.ParallelHash256` | Parallel-friendly hashing for large messages |
+| Algorithm             | Helper(s)                                                                              | Notes                                         |
+|-----------------------|----------------------------------------------------------------------------------------|-----------------------------------------------|
+| TupleHash128 / 256    | `hash.TupleHash128(tuple, outLen, customization)` / `hash.TupleHash256`                | Tuple of byte-strings, optional customization |
+| ParallelHash128 / 256 | `hash.ParallelHash128(msg, blockSize, outLen, customization)` / `hash.ParallelHash256` | Parallel-friendly hashing for large messages  |
 
 ### XOF (Extendable-output function)
 
@@ -83,15 +75,15 @@ primitives can be swapped transparently.
 
 ### KDF (Key derivation function)
 
-| Algorithm           | Deriver constructor             | Single-shot helper(s)                                                       | Notes                                                 |
-|---------------------|---------------------------------|-----------------------------------------------------------------------------|-------------------------------------------------------|
-| HKDF-SHA256         | `kdf.NewHKDFSHA256()`           | `kdf.HKDFSHA256()`<br>`kdf.HKDFSHA256Extract()`<br>`kdf.HKDFSHA256Expand()` | Max length 255 x 32 B (RFC 5869)                        |
-| HKDF (generic hash) | `kdf.NewHKDF(func() hash.Hash)` | `kdf.HKDF()`<br>`kdf.HKDFExtractWith()`<br>`kdf.HKDFExpandWith()`           | Length bound = 255 x hash.Size()                        |
-| HKDF-BLAKE2b        | `kdf.NewHKDFBlake2b()`          | `kdf.HKDFBlake2b()`                                                         | 64 B digest variant                                   |
-| PBKDF2-SHA1         | `kdf.NewPBKDF2SHA1()`           | `kdf.PBKDF2SHA1()`<br>`kdf.PBKDF2SHA1Into()`                                | See `kdf.CheckParams` for policy checks               |
-| PBKDF2-SHA256       | `kdf.NewPBKDF2SHA256()`         | `kdf.PBKDF2SHA256()`<br>`kdf.PBKDF2SHA256Into()`                            | Iterations > 0; variable output length                |
-| Argon2id            | `kdf.NewArgon2id()`<br>`kdf.NewArgon2idWithParams()` | `kdf.Argon2id()`                                                             | RFC 9106 Argon2id; defaults to time=1, memory=64 MiB, lanes=1 |
-| scrypt              | `kdf.NewScrypt(n, r, p)`        | `kdf.Scrypt()`                                                              | RFC 7914 constraints on n,r,p; variable output length |
+| Algorithm           | Deriver constructor                                  | Single-shot helper(s)                                                       | Notes                                                         |
+|---------------------|------------------------------------------------------|-----------------------------------------------------------------------------|---------------------------------------------------------------|
+| HKDF-SHA256         | `kdf.NewHKDFSHA256()`                                | `kdf.HKDFSHA256()`<br>`kdf.HKDFSHA256Extract()`<br>`kdf.HKDFSHA256Expand()` | Max length 255 x 32 B (RFC 5869)                              |
+| HKDF (generic hash) | `kdf.NewHKDF(func() hash.Hash)`                      | `kdf.HKDF()`<br>`kdf.HKDFExtractWith()`<br>`kdf.HKDFExpandWith()`           | Length bound = 255 x hash.Size()                              |
+| HKDF-BLAKE2b        | `kdf.NewHKDFBlake2b()`                               | `kdf.HKDFBlake2b()`                                                         | 64 B digest variant                                           |
+| PBKDF2-SHA1         | `kdf.NewPBKDF2SHA1()`                                | `kdf.PBKDF2SHA1()`<br>`kdf.PBKDF2SHA1Into()`                                | See `kdf.CheckParams` for policy checks                       |
+| PBKDF2-SHA256       | `kdf.NewPBKDF2SHA256()`                              | `kdf.PBKDF2SHA256()`<br>`kdf.PBKDF2SHA256Into()`                            | Iterations > 0; variable output length                        |
+| Argon2id            | `kdf.NewArgon2id()`<br>`kdf.NewArgon2idWithParams()` | `kdf.Argon2id()`                                                            | RFC 9106 Argon2id; defaults to time=1, memory=64 MiB, lanes=1 |
+| scrypt              | `kdf.NewScrypt(n, r, p)`                             | `kdf.Scrypt()`                                                              | RFC 7914 constraints on n,r,p; variable output length         |
 
 ### MAC (Message authentication code)
 
@@ -122,16 +114,16 @@ Block primitives are instantiated through `block.NewAES128` / `block.NewAES256`,
 
 ### Signatures (ECDSA, EdDSA)
 
-| Algorithm   | Constructor(s)            | Public              | Private     | Signature            | Notes |
-|------------|----------------------------|---------------------|-------------|----------------------|-------|
-| Ed25519    | `sig.NewEd25519()`         | 32 B                | 64 B        | 64 B                 | Deterministic; `sig.FromSeed(32 B)` supported |
-| ECDSA P-256| `sig.NewECDSAP256()`       | 65 B (uncompressed) | 32 B scalar | ASN.1 DER (variable) | Helpers: `sig.GenerateKeyECDSAP256`, `sig.SignECDSAP256`, `sig.VerifyECDSAP256` |
+| Algorithm   | Constructor(s)       | Public              | Private     | Signature            | Notes                                                                           |
+|-------------|----------------------|---------------------|-------------|----------------------|---------------------------------------------------------------------------------|
+| Ed25519     | `sig.NewEd25519()`   | 32 B                | 64 B        | 64 B                 | Deterministic; `sig.FromSeed(32 B)` supported                                   |
+| ECDSA P-256 | `sig.NewECDSAP256()` | 65 B (uncompressed) | 32 B scalar | ASN.1 DER (variable) | Helpers: `sig.GenerateKeyECDSAP256`, `sig.SignECDSAP256`, `sig.VerifyECDSAP256` |
 
-| Algorithm | Constructor       | Public              | Private     | Shared | Notes |
-|----------|-------------------|---------------------|-------------|--------|-------|
-| X25519   | `ecdh.New()`      | 32 B                | 32 B        | 32 B   | RFC 7748 (crypto/ecdh) |
-| P-256    | `ecdh.NewP256()`  | 65 B (uncompressed) | 32 B scalar | 32 B   | Uncompressed public: 0x04 || X || Y |
-| P-384    | `ecdh.NewP384()`  | 97 B (uncompressed) | 48 B scalar | 48 B   | Uncompressed public: 0x04 || X || Y |
+| Algorithm | Constructor      | Public              | Private     | Shared | Notes                     |
+|-----------|------------------|---------------------|-------------|--------|---------------------------|
+| X25519    | `ecdh.New()`     | 32 B                | 32 B        | 32 B   | RFC 7748 (crypto/ecdh)    |
+| P-256     | `ecdh.NewP256()` | 65 B (uncompressed) | 32 B scalar | 32 B   | Uncompressed public: 0x04 || X || Y |
+| P-384     | `ecdh.NewP384()` | 97 B (uncompressed) | 48 B scalar | 48 B   | Uncompressed public: 0x04 || X || Y |
 
 ## API
 
@@ -421,7 +413,3 @@ on tags and ciphertext.
 - Algorithms require exact key/nonce sizes; invalid sizes result in errors.
 - Deoxys-II produces deterministic keystream inputs and is nonce-misuse resistant, but nonces must remain unique per key
   to avoid revealing repeated plaintext keystream correlations.
-
-
-
-
