@@ -77,6 +77,54 @@ func TestHybridRejectsUnexpectedPQMaterial(t *testing.T) {
 	}
 }
 
+func TestHybridRejectsMissingPQMaterial(t *testing.T) {
+	stub := &stubKEM{
+		public:       []byte{0x01, 0x02, 0x03},
+		private:      []byte{0x04, 0x05, 0x06, 0x07},
+		ciphertext:   []byte{0xAA, 0xBB, 0xCC},
+		sharedSecret: []byte("stub-mlkem-secret"),
+	}
+	hybrid, err := pq.NewHybrid(ecdh.New(), stub)
+	if err != nil {
+		t.Fatalf("NewHybrid: %v", err)
+	}
+	pub, priv, err := hybrid.GenerateKey()
+	if err != nil {
+		t.Fatalf("GenerateKey: %v", err)
+	}
+	ct, _, err := hybrid.Encapsulate(pub)
+	if err != nil {
+		t.Fatalf("Encapsulate: %v", err)
+	}
+
+	classicalPub, _, err := parseHybridForTest(pub)
+	if err != nil {
+		t.Fatalf("parseHybridForTest(pub): %v", err)
+	}
+	forgedPub := encodeHybridForTest(classicalPub, nil)
+	if _, _, err := hybrid.Encapsulate(forgedPub); err == nil {
+		t.Fatal("Encapsulate accepted missing PQ key component")
+	}
+
+	classicalPriv, _, err := parseHybridForTest(priv)
+	if err != nil {
+		t.Fatalf("parseHybridForTest(priv): %v", err)
+	}
+	forgedPriv := encodeHybridForTest(classicalPriv, nil)
+	if _, err := hybrid.Decapsulate(forgedPriv, ct); err == nil {
+		t.Fatal("Decapsulate accepted missing PQ key component")
+	}
+
+	classicalCT, _, err := parseHybridForTest(ct)
+	if err != nil {
+		t.Fatalf("parseHybridForTest(ct): %v", err)
+	}
+	forgedCT := encodeHybridForTest(classicalCT, nil)
+	if _, err := hybrid.Decapsulate(priv, forgedCT); err == nil {
+		t.Fatal("Decapsulate accepted missing PQ ciphertext component")
+	}
+}
+
 func TestHybridWithPostQuantumStub(t *testing.T) {
 	stub := &stubKEM{
 		public:       []byte{0xAA, 0xBB},
