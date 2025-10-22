@@ -62,6 +62,9 @@ func (a aesSIV) encryptWithAssociatedData(key, nonce []byte, ad [][]byte, plaint
 	if len(key) != a.keyLen {
 		return nil, errors.New("aessiv: invalid key size")
 	}
+	if len(ad) > 126 {
+		return nil, errors.New("aessiv: too many associated data components")
+	}
 	macKey := key[:len(key)/2]
 	encKey := key[len(key)/2:]
 	synthetic, err := computeS2V(macKey, nonce, ad, plaintext)
@@ -87,6 +90,9 @@ func (a aesSIV) encryptWithAssociatedData(key, nonce []byte, ad [][]byte, plaint
 func (a aesSIV) decryptWithAssociatedData(key, nonce []byte, ad [][]byte, ciphertextAndTag []byte) ([]byte, error) {
 	if len(key) != a.keyLen {
 		return nil, errors.New("aessiv: invalid key size")
+	}
+	if len(ad) > 126 {
+		return nil, errors.New("aessiv: too many associated data components")
 	}
 	if len(ciphertextAndTag) < aesSIVTagSize {
 		return nil, errors.New("aessiv: ciphertext too short")
