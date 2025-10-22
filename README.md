@@ -127,14 +127,14 @@ Block primitives are instantiated through `block.NewAES128` / `block.NewAES256`,
 
 ### Post-quantum key encapsulation
 
-The `pq` package defines a shared `pq.KEM` interface together with a deployable
+The `kem` package defines a shared `kem.KEM` interface together with a deployable
 hybrid construction:
 
-* `kem/x25519.New()` — classical KEM adapter built on top of the existing
+* `kem.New()` - classical KEM adapter built on top of the existing
   `ecdh` helpers (deployable today, pure Go, stdlib only). The adapter lives in
-  its own package to highlight that it provides classical security and can be
+  the `kem` package to highlight that it provides classical security and can be
   reused by non-PQ code paths.
-* `pq.NewHybridX25519()` — versioned hybrid format that composes the X25519
+* `pq.NewHybridX25519()` - versioned hybrid format that composes the X25519
   exchange with an optional ML-KEM component. Callers can inject a vetted ML-KEM
   implementation via `pq.NewHybrid(classical, mlkem)` without changing encoded
   formats or downstream APIs.
@@ -184,7 +184,7 @@ type Hasher interface {
   single-shot helpers (`hash.NewSHA3256Hasher()`, `hash.NewXoodyakHasher()`, `hash.Sum*`, `hash.SumXoodyak`) that satisfy
   `hash.Hasher`.
 
-KEM interface in `pq/pq.go`:
+KEM interface in `kem/kem.go`:
 
 ```go
 type KEM interface {

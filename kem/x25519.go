@@ -1,10 +1,9 @@
-package x25519
+package kem
 
 import (
 	"errors"
 
 	"github.com/AeonDave/cryptonite-go/ecdh"
-	"github.com/AeonDave/cryptonite-go/pq"
 	"github.com/AeonDave/cryptonite-go/secret"
 )
 
@@ -15,21 +14,21 @@ const (
 	PrivateSize = 32
 )
 
-// Adapter exposes the classical X25519 ECDH primitive through the pq.KEM
+// Adapter exposes the classical X25519 ECDH primitive through the kem.KEM
 // interface. The ciphertext returned by Encapsulate is the ephemeral X25519
 // public key.
 //
-// The adapter intentionally lives outside of the pq package to highlight that
-// it provides classical security. It can be composed with pq.Hybrid to build
+// The adapter intentionally lives in the kem package to highlight that it
+// provides classical security. It can be composed with pq.Hybrid to build
 // hybrid or future post-quantum deployments.
 type Adapter struct {
 	ke ecdh.KeyExchange
 }
 
-var _ pq.KEM = (*Adapter)(nil)
+var _ KEM = (*Adapter)(nil)
 
-// New returns a ready-to-use X25519-based pq.KEM implementation.
-func New() pq.KEM {
+// New returns a ready-to-use X25519-based kem.KEM implementation.
+func New() KEM {
 	return &Adapter{ke: ecdh.New()}
 }
 

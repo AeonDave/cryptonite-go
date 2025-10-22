@@ -1,7 +1,7 @@
-package pq
+package kem
 
 // KEM defines the minimal interface implemented by key encapsulation
-// mechanisms exposed by the pq package. Implementations are responsible for
+// mechanisms exposed by the kem package. Implementations are responsible for
 // sourcing entropy via crypto/rand and therefore expose deterministic method
 // signatures that do not require callers to pass a randomness source.
 type KEM interface {

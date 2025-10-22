@@ -14,6 +14,8 @@ This Agents.md file provides comprehensive guidance for AI agents working with t
 - `/sig`: Signature algorithms including Ed25519 and ECDSA P-256.
 - `/ecdh`: Elliptic Curve Diffie-Hellman for X25519, P-256, and P-384.
 - `/hpke`: Hybrid Public Key Encryption implementations.
+- `/kem`: Key Encapsulation Mechanisms (KEM) adapters, such as X25519 KEM.
+- `/pq`: Post-quantum KEMs and signatures, including hybrid constructions.
 - `/secret`: Helpers for secret material management, including symmetric keys, nonces, and counters.
 - `/internal`: Internal implementations and primitives shared across packages (e.g., BLAKE2b, ChaCha20, Keccak).
 - `/test`: Test suites with known-answer tests, Wycheproof vectors, and fuzzing harnesses. Each package has its own tests with /testdata test vectors.
@@ -41,6 +43,8 @@ This Agents.md file provides comprehensive guidance for AI agents working with t
 - **Stream/Block**: Implement shared interfaces (`stream.Stream`, `block.Cipher`) for interchangeability.
 - **Signatures/ECDH**: Use standard formats (e.g., Ed25519 64B signatures, uncompressed EC points).
 - **HPKE**: Follow RFC 9180 base mode; use predefined suites like `hpke.SuiteX25519ChaCha20`.
+- **KEM**: Implement `kem.KEM` interface; generate key, encapsulate, and decapsulate shared secrets.
+- **PQ**: Use `kem.KEM` interface for post-quantum key encapsulation; support hybrid constructions with classical KEMs.
 - **Secret**: Use `secret` package for secure key/nonce management; defer `Destroy()` calls.
 
 ## Testing Requirements for AI Agents

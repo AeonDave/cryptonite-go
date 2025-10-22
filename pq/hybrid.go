@@ -7,6 +7,7 @@ import (
 
 	"github.com/AeonDave/cryptonite-go/ecdh"
 	"github.com/AeonDave/cryptonite-go/kdf"
+	"github.com/AeonDave/cryptonite-go/kem"
 	"github.com/AeonDave/cryptonite-go/secret"
 )
 
@@ -32,12 +33,12 @@ var (
 // classical and post-quantum components.
 type Hybrid struct {
 	classical ecdh.KeyExchange
-	mlkem     KEM
+	mlkem     kem.KEM
 }
 
 // NewHybrid constructs a Hybrid KEM using the provided classical ECDH exchange
 // and optional post-quantum KEM. The classical exchange must be non-nil.
-func NewHybrid(classical ecdh.KeyExchange, mlkem KEM) (*Hybrid, error) {
+func NewHybrid(classical ecdh.KeyExchange, mlkem kem.KEM) (*Hybrid, error) {
 	if classical == nil {
 		return nil, errors.New("pq: nil classical exchange")
 	}

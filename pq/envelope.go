@@ -8,6 +8,7 @@ import (
 
 	"github.com/AeonDave/cryptonite-go/aead"
 	"github.com/AeonDave/cryptonite-go/kdf"
+	"github.com/AeonDave/cryptonite-go/kem"
 	"github.com/AeonDave/cryptonite-go/secret"
 )
 
@@ -44,14 +45,14 @@ var envelopeSchedules = []envelopeSchedule{
 // Seal performs KEM -> HKDF -> AEAD composition using the provided KEM and
 // AEAD implementations. The returned blob encodes the encapsulated key, the
 // chosen key schedule identifier, and the AEAD ciphertext (ciphertext || tag).
-func Seal(kem KEM, cipher aead.Aead, publicKey, associatedData, plaintext []byte) ([]byte, error) {
-	if kem == nil {
+func Seal(k kem.KEM, cipher aead.Aead, publicKey, associatedData, plaintext []byte) ([]byte, error) {
+	if k == nil {
 		return nil, errNilKEM
 	}
 	if cipher == nil {
 		return nil, errNilAEAD
 	}
-	enc, sharedSecret, err := kem.Encapsulate(publicKey)
+	enc, sharedSecret, err := k.Encapsulate(publicKey)
 	if err != nil {
 		return nil, err
 	}
@@ -111,8 +112,8 @@ func envelopeEncrypt(cipher aead.Aead, sharedSecret, ad, pt []byte) (byte, []byt
 
 // Open reverses Seal by decapsulating the shared secret and decrypting the
 // payload using the stored key schedule identifier.
-func Open(kem KEM, cipher aead.Aead, privateKey, associatedData, blob []byte) ([]byte, error) {
-	if kem == nil {
+func Open(k kem.KEM, cipher aead.Aead, privateKey, associatedData, blob []byte) ([]byte, error) {
+	if k == nil {
 		return nil, errNilKEM
 	}
 	if cipher == nil {
@@ -137,7 +138,7 @@ func Open(kem KEM, cipher aead.Aead, privateKey, associatedData, blob []byte) ([
 		return nil, errInvalidBlob
 	}
 	ciphertext := blob[offset:]
-	sharedSecret, err := kem.Decapsulate(privateKey, enc)
+	sharedSecret, err := k.Decapsulate(privateKey, enc)
 	if err != nil {
 		return nil, err
 	}

@@ -5,8 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	kemx25519 "github.com/AeonDave/cryptonite-go/kem/x25519"
-	pq "github.com/AeonDave/cryptonite-go/pq"
+	kem "github.com/AeonDave/cryptonite-go/kem"
 	testutil "github.com/AeonDave/cryptonite-go/test/internal/testutil"
 
 	_ "embed"
@@ -34,32 +33,32 @@ func loadX25519KAT(t *testing.T) []x25519KATCase {
 	return cases
 }
 
-func newX25519(t *testing.T) pq.KEM {
+func newX25519(t *testing.T) kem.KEM {
 	t.Helper()
-	kem := kemx25519.New()
-	if kem == nil {
+	k := kem.New()
+	if k == nil {
 		t.Fatal("x25519.New returned nil")
 	}
-	return kem
+	return k
 }
 
 func TestX25519KEMRoundTrip(t *testing.T) {
-	kem := newX25519(t)
-	pk, sk, err := kem.GenerateKey()
+	k := newX25519(t)
+	pk, sk, err := k.GenerateKey()
 	if err != nil {
 		t.Fatalf("GenerateKey failed: %v", err)
 	}
-	ct, ss, err := kem.Encapsulate(pk)
+	ct, ss, err := k.Encapsulate(pk)
 	if err != nil {
 		t.Fatalf("Encapsulate failed: %v", err)
 	}
-	if len(ct) != kemx25519.PublicSize {
+	if len(ct) != kem.PublicSize {
 		t.Fatalf("unexpected ciphertext length %d", len(ct))
 	}
-	if len(ss) != kemx25519.PublicSize {
+	if len(ss) != kem.PublicSize {
 		t.Fatalf("unexpected shared secret length %d", len(ss))
 	}
-	recovered, err := kem.Decapsulate(sk, ct)
+	recovered, err := k.Decapsulate(sk, ct)
 	if err != nil {
 		t.Fatalf("Decapsulate failed: %v", err)
 	}
@@ -70,12 +69,12 @@ func TestX25519KEMRoundTrip(t *testing.T) {
 
 func TestX25519KEMKnownAnswer(t *testing.T) {
 	cases := loadX25519KAT(t)
-	kem := newX25519(t)
+	k := newX25519(t)
 	for i, tc := range cases {
 		sk := testutil.MustHex(t, tc.Private)
 		ct := testutil.MustHex(t, tc.Ciphertext)
 		want := testutil.MustHex(t, tc.SharedSecret)
-		got, err := kem.Decapsulate(sk, ct)
+		got, err := k.Decapsulate(sk, ct)
 		if err != nil {
 			t.Fatalf("case %d (%s): Decapsulate failed: %v", i, tc.Name, err)
 		}
@@ -86,17 +85,17 @@ func TestX25519KEMKnownAnswer(t *testing.T) {
 }
 
 func TestX25519KEMRejectsMalformedInputs(t *testing.T) {
-	kem := newX25519(t)
-	if _, _, err := kem.GenerateKey(); err != nil {
+	k := newX25519(t)
+	if _, _, err := k.GenerateKey(); err != nil {
 		t.Fatalf("GenerateKey failed: %v", err)
 	}
-	if _, _, err := kem.Encapsulate([]byte("short")); err == nil {
+	if _, _, err := k.Encapsulate([]byte("short")); err == nil {
 		t.Fatal("Encapsulate accepted short public key")
 	}
-	if _, err := kem.Decapsulate(make([]byte, kemx25519.PrivateSize-1), make([]byte, kemx25519.PublicSize)); err == nil {
+	if _, err := k.Decapsulate(make([]byte, kem.PrivateSize-1), make([]byte, kem.PublicSize)); err == nil {
 		t.Fatal("Decapsulate accepted short private key")
 	}
-	if _, err := kem.Decapsulate(make([]byte, kemx25519.PrivateSize), make([]byte, kemx25519.PublicSize-1)); err == nil {
+	if _, err := k.Decapsulate(make([]byte, kem.PrivateSize), make([]byte, kem.PublicSize-1)); err == nil {
 		t.Fatal("Decapsulate accepted short ciphertext")
 	}
 }
