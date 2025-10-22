@@ -174,6 +174,7 @@ func NewBlake2sXOF(length uint32, key []byte) (xof.XOF, error) {
 type blake2Hasher struct {
 	size    int
 	key     []byte
+	maxSize int
 	newFunc func(int, []byte) (stdhash.Hash, error)
 }
 
@@ -186,7 +187,7 @@ func newBlake2Hasher(newFunc func(int, []byte) (stdhash.Hash, error), maxSize, s
 	}
 	dup := make([]byte, len(key))
 	copy(dup, key)
-	return blake2Hasher{size: size, key: dup, newFunc: newFunc}, nil
+	return blake2Hasher{size: size, key: dup, maxSize: maxSize, newFunc: newFunc}, nil
 }
 
 func (h blake2Hasher) Hash(msg []byte) []byte {
