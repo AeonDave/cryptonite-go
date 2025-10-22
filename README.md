@@ -150,8 +150,8 @@ Size() int
 
 - `Hash` computes the digest of the provided message using any of the available primitives.
 - `Size` reports the fixed digest length (in bytes).
-- SHA-3 and Xoodyak packages expose both streaming constructors (e.g. `sha3.Newsha3256()`, `xoodyak.New()`) and
-  single-shot helpers (`sha3.Newsha3256Hasher()`, `xoodyak.NewHasher()`, `sha3.Sum*`, `xoodyak.Sum`) that satisfy
+- SHA-3 and Xoodyak helpers under `hash` expose both streaming constructors (e.g. `hash.NewSHA3256()`, `hash.NewXoodyak()`) and
+  single-shot helpers (`hash.NewSHA3256Hasher()`, `hash.NewXoodyakHasher()`, `hash.Sum*`, `hash.SumXoodyak`) that satisfy
   `hash.Hasher`.
 
 ## Examples
