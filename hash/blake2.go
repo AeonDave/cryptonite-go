@@ -2,6 +2,7 @@ package hash
 
 import (
 	"errors"
+	"fmt"
 	stdhash "hash"
 	"math"
 
@@ -55,7 +56,7 @@ func (b Blake2bBuilder) Hash() (stdhash.Hash, error) {
 
 // Hasher returns a stateless helper implementing hash.Hasher.
 func (b Blake2bBuilder) Hasher() (Hasher, error) {
-	return newBlake2Hasher(blake2b.New, blake2b.Size, b.size, b.key)
+	return newBlake2Hasher(blake2b.New, blake2b.Size, b.size, b.key, "BLAKE2b")
 }
 
 // Sum computes a single-shot digest using the configured parameters.
@@ -83,7 +84,7 @@ func NewBlake2b(size int, key []byte) (stdhash.Hash, error) {
 // NewBlake2bHasher creates a stateless BLAKE2b helper with the given digest
 // length and optional key.
 func NewBlake2bHasher(size int, key []byte) (Hasher, error) {
-	return newBlake2Hasher(blake2b.New, blake2b.Size, size, key)
+	return newBlake2Hasher(blake2b.New, blake2b.Size, size, key, "BLAKE2b")
 }
 
 // NewBlake2bXOF constructs a BLAKE2b extendable-output instance.
@@ -129,7 +130,7 @@ func (b Blake2sBuilder) Hash() (stdhash.Hash, error) {
 
 // Hasher returns a stateless helper implementing hash.Hasher.
 func (b Blake2sBuilder) Hasher() (Hasher, error) {
-	return newBlake2Hasher(blake2s.New, blake2s.Size, b.size, b.key)
+	return newBlake2Hasher(blake2s.New, blake2s.Size, b.size, b.key, "BLAKE2s")
 }
 
 // Sum computes a single-shot digest using the configured parameters.
@@ -159,7 +160,7 @@ func NewBlake2s(size int, key []byte) (stdhash.Hash, error) {
 // NewBlake2sHasher creates a stateless BLAKE2s helper with the given digest
 // length and optional key.
 func NewBlake2sHasher(size int, key []byte) (Hasher, error) {
-	return newBlake2Hasher(blake2s.New, blake2s.Size, size, key)
+	return newBlake2Hasher(blake2s.New, blake2s.Size, size, key, "BLAKE2s")
 }
 
 // Deprecated: use xof.Blake2s.
@@ -177,12 +178,12 @@ type blake2Hasher struct {
 	newFunc func(int, []byte) (stdhash.Hash, error)
 }
 
-func newBlake2Hasher(newFunc func(int, []byte) (stdhash.Hash, error), maxSize, size int, key []byte) (Hasher, error) {
+func newBlake2Hasher(newFunc func(int, []byte) (stdhash.Hash, error), maxSize, size int, key []byte, alg string) (Hasher, error) {
 	if size <= 0 || size > maxSize {
 		return nil, errors.New("hash: invalid BLAKE2 digest size")
 	}
 	if len(key) > maxSize {
-		return nil, errors.New("hash: BLAKE2 key too long")
+		return nil, fmt.Errorf("hash: %s key too long (max %d bytes)", alg, maxSize)
 	}
 	dup := make([]byte, len(key))
 	copy(dup, key)
