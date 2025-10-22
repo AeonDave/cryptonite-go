@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/AeonDave/cryptonite-go)](https://goreportcard.com/report/github.com/AeonDave/cryptonite-go)
 ![GitHub License](https://img.shields.io/github/license/AeonDave/cryptonite-go)
 
-Minimal, modern, dependency-free cryptography library for Go, using only the standard library.
+Minimal, modern, ultra-fast, dependency-free cryptography library for Go, using only the standard library.
 
 ## Overview
 
@@ -32,19 +32,19 @@ go get github.com/AeonDave/cryptonite-go
 
 ### AEAD
 
-| Algorithm          | Constructor(s)                                 | Key       | Nonce               | Tag | Notes                                                                                    | RFC / Spec                                                                                                                             |
-|--------------------|------------------------------------------------|-----------|---------------------|-----|------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| ASCON-128a         | `aead.NewAscon128()`                           | 16B       | 16B                 | 16B | NIST LwC winner                                                                          | [FIPS 208](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.208.pdf)                                                                   |
-| ASCON-80pq         | `aead.NewAscon80pq()`                          | 20B       | 16B                 | 16B | PQ-hardened variant                                                                      | [FIPS 208](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.208.pdf)                                                                   |
-| GIFT-COFB          | `aead.NewGiftCofb()`                           | 16B       | 16B                 | 16B | Ultra-lightweight finalist                                                               | [IACR 2018/803](https://eprint.iacr.org/2018/803.pdf)                                           |
+| Algorithm          | Constructor(s)                                 | Key       | Nonce               | Tag | Notes                                                                                    | RFC / Spec                                                                                                                                 |
+|--------------------|------------------------------------------------|-----------|---------------------|-----|------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| ASCON-128a         | `aead.NewAscon128()`                           | 16B       | 16B                 | 16B | NIST LwC winner                                                                          | [FIPS 208](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.208.pdf)                                                                       |
+| ASCON-80pq         | `aead.NewAscon80pq()`                          | 20B       | 16B                 | 16B | PQ-hardened variant                                                                      | [FIPS 208](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.208.pdf)                                                                       |
+| GIFT-COFB          | `aead.NewGiftCofb()`                           | 16B       | 16B                 | 16B | Ultra-lightweight finalist                                                               | [IACR 2018/803](https://eprint.iacr.org/2018/803.pdf)                                                                                      |
 | SKINNY-AEAD-M1     | `aead.NewSkinnyAead()`                         | 16B       | 16B                 | 16B | Tweakable block-cipher AEAD (128-bit tag)                                                | [NIST LwC Round 1 submission](https://csrc.nist.gov/CSRC/media/Projects/lightweight-cryptography/documents/round-1/submissions/SKINNY.pdf) |
-| Xoodyak-Encrypt    | `aead.NewXoodyak()`                            | 16B       | 16B                 | 16B | Cyclist mode                                                                             | [Xoodyak specification](https://keccak.team/files/Xoodyak-specification.pdf)                                                           |
-| ChaCha20-Poly1305  | `aead.NewChaCha20Poly1305()`                   | 32B       | 12B                 | 16B | RFC 8439 layout                                                                          | [RFC 8439](https://www.rfc-editor.org/rfc/rfc8439.html)                                                                                |
-| XChaCha20-Poly1305 | `aead.NewXChaCha20Poly1305()`                  | 32B       | 24B                 | 16B | Derives nonce via HChaCha20                                                              | [draft-irtf-cfrg-xchacha-03](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-xchacha-03)                                         |
-| AES-GCM            | `aead.NewAESGCM()`                             | 16/24/32B | 12B                 | 16B | AES-NI optional                                                                          | [NIST SP 800-38D](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf)                                       |
-| AES-GCM-SIV        | `aead.NewAesGcmSiv()`                          | 16/32B    | 12B                 | 16B | Nonce misuse resistant                                                                   | [RFC 8452](https://www.rfc-editor.org/rfc/rfc8452.html)                                                                                |
-| AES-SIV (128/256)  | `aead.NewAES128SIV()`<br>`aead.NewAES256SIV()` | 32B / 64B | Deterministic (AAD) | 16B | Deterministic SIV construction; optional multi-AD support via `aead.MultiAssociatedData` | [RFC 5297](https://www.rfc-editor.org/rfc/rfc5297.html)                                                                                |
-| Deoxys-II-256-128  | `aead.NewDeoxysII128()`                        | 32B       | 15B                 | 16B | NIST LwC finalist                                                                        | [NIST LWC finalist spec](https://csrc.nist.gov/csrc/media/Projects/lightweight-cryptography/documents/finalists/deoxys-spec-final.pdf) |
+| Xoodyak-Encrypt    | `aead.NewXoodyak()`                            | 16B       | 16B                 | 16B | Cyclist mode                                                                             | [Xoodyak specification](https://keccak.team/files/Xoodyak-specification.pdf)                                                               |
+| ChaCha20-Poly1305  | `aead.NewChaCha20Poly1305()`                   | 32B       | 12B                 | 16B | RFC 8439 layout                                                                          | [RFC 8439](https://www.rfc-editor.org/rfc/rfc8439.html)                                                                                    |
+| XChaCha20-Poly1305 | `aead.NewXChaCha20Poly1305()`                  | 32B       | 24B                 | 16B | Derives nonce via HChaCha20                                                              | [draft-irtf-cfrg-xchacha-03](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-xchacha-03)                                             |
+| AES-GCM            | `aead.NewAESGCM()`                             | 16/24/32B | 12B                 | 16B | AES-NI optional                                                                          | [NIST SP 800-38D](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf)                                           |
+| AES-GCM-SIV        | `aead.NewAesGcmSiv()`                          | 16/32B    | 12B                 | 16B | Nonce misuse resistant                                                                   | [RFC 8452](https://www.rfc-editor.org/rfc/rfc8452.html)                                                                                    |
+| AES-SIV (128/256)  | `aead.NewAES128SIV()`<br>`aead.NewAES256SIV()` | 32B / 64B | Deterministic (AAD) | 16B | Deterministic SIV construction; optional multi-AD support via `aead.MultiAssociatedData` | [RFC 5297](https://www.rfc-editor.org/rfc/rfc5297.html)                                                                                    |
+| Deoxys-II-256-128  | `aead.NewDeoxysII128()`                        | 32B       | 15B                 | 16B | NIST LwC finalist                                                                        | [NIST LWC finalist spec](https://csrc.nist.gov/csrc/media/Projects/lightweight-cryptography/documents/finalists/deoxys-spec-final.pdf)     |
 
 ### Hashing
 
@@ -165,8 +165,14 @@ All algorithms in the repository ship with Go benchmark harnesses located under
 the `test` directory. To gather benchmark numbers (including allocation
 profiles) for every category, run:
 
+Shell
 ```bash
 go test ./test/... -bench=. -benchmem
+```
+
+Powershell
+```bash
+go test ./test/... -run='^$' -bench . -benchmem -count=1
 ```
 
 You can scope the command to a specific family when needed, for example:
@@ -183,6 +189,28 @@ added alongside the existing test vectors.
 Symmetric protection remains classical (AEAD); only the key agreement layer is
 made hybrid/PQ-ready following the recommendations from
 [draft-ietf-tls-hybrid-design](https://datatracker.ietf.org/doc/html/draft-ietf-tls-hybrid-design-05).
+
+## Performance Summary (AMD Ryzen 7, Go 1.22+)
+
+| Category   | Algorithm          | Encrypt/Hash  | MB/s   | Allocs/op             | Notes                |
+|------------|--------------------|---------------|--------|-----------------------|----------------------|
+| **AEAD**   | **AES-GCM**        | 1488 MB/s     | 0      | **1.5 GB/s**          | Hardware accelerated |
+| **AEAD**   | **ChaCha20-Poly**  | 178 MB/s      | 3      | Portable              |                      |
+| **AEAD**   | **ASCON-128a**     | **223 MB/s**  | 3      | **Lightweight champ** |
+| **AEAD**   | **Xoodyak**        | 212 MB/s      | 2      | IoT optimized         |
+| **AEAD**   | **AES-SIV**        | 442 MB/s      | 13     | Nonce-misuse safe     |
+| **Block**  | **AES-128**        | **1940 MB/s** | **0**  | AES-NI                |
+| **Hash**   | **BLAKE2b-512**    | **742 MB/s**  | 2      | **Fastest**           |
+| **Hash**   | **SHA3-256**       | 38 MB/s       | 1      | NIST standard         |
+| **XOF**    | **BLAKE2b XOF**    | **189 MB/s**  | 1      | Streaming champ       |
+| **KDF**    | **HKDF-SHA256**    | 27 MB/s       | 18     | Fast key derivation   |
+| **KDF**    | **Argon2id**       | 0.01 MB/s     | 19 MiB | Memory-hard           |
+| **MAC**    | **Poly1305**       | **3117 MB/s** | 4      | **Ultra-fast**        |
+| **Stream** | **ChaCha20**       | **224 MB/s**  | **0**  | Zero allocs           |
+| **Sig**    | **Ed25519 Verify** | 23 MB/s       | **0**  | Fastest signature     |
+| **ECDH**   | **X25519**         | 0.82 MB/s     | 1      | Key exchange          |
+
+**Full results**: [benchmark.md](https://github.com/AeonDave/cryptonite-go/blob/main/benchmark.md)
 
 ## API
 
