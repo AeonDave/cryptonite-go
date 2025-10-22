@@ -11,8 +11,11 @@ Minimal, dependency-free cryptography library in Go implemented using only the s
   attack surface.
 - Consistent AEAD and hashing APIs, including single-shot helpers via `hash.Hasher`, plus reusable KDF, signature, and
   ECDH layers.
+- HPKE base mode (RFC 9180) with X25519, HKDF-SHA256, and both ChaCha20-Poly1305 and AES-128-GCM cipher suites.
 - Extensive known-answer tests, spec-aligned constants (e.g. NIST FIPS 202 for SHA-3/SHAKE), and selective zeroisation
   of sensitive buffers.
+- Secret key/nonce wrappers (`secret` package) provide typed buffers with best-effort zeroisation and monotonic 96/192-bit counters.
+- Wycheproof-inspired regression suites and `testing/fuzz` harnesses for AES-GCM and ChaCha20-Poly1305 to protect against regressions.
 - Uniform ciphertext layout for AEAD constructions (`ciphertext || tag`) and deterministic test fixtures for
   reproducibility.
 - AES-SIV exposes optional multi-associated-data helpers so callers can supply the full vector of strings defined by RFC
@@ -57,6 +60,13 @@ the Go `hash.Hash` type without importing algorithm-specific subpackages.
 | BLAKE2b      | `hash.NewBlake2bBuilder()` | `hash.NewBlake2bHasher()` / `hash.NewBlake2b()` | Configurable 1–64 B digest, optional keyed MAC mode |
 | BLAKE2s      | `hash.NewBlake2sBuilder()` | `hash.NewBlake2sHasher()` / `hash.NewBlake2s()` | Configurable 1–32 B digest, optional keyed MAC mode |
 | Xoodyak Hash | `hash.NewXoodyak()`        | `hash.NewXoodyakHasher()` / `hash.SumXoodyak()` | 32 B Cyclist hash                                   |
+
+#### SP 800-185 constructions
+
+| Algorithm            | Helper(s)                                                               | Notes                                         |
+|----------------------|-------------------------------------------------------------------------|-----------------------------------------------|
+| TupleHash128 / 256   | `hash.TupleHash128(tuple, outLen, customization)` / `hash.TupleHash256` | Tuple of byte-strings, optional customization |
+| ParallelHash128 / 256| `hash.ParallelHash128(msg, blockSize, outLen, customization)` / `hash.ParallelHash256` | Parallel-friendly hashing for large messages |
 
 ### XOF (Extendable-output function)
 
@@ -356,6 +366,36 @@ func main() {
 	bShared, _ := ke.SharedSecret(bPriv, aPriv.PublicKey())
 	fmt.Println(string(aShared) == string(bShared))
 }
+```
+
+### Secret material helpers
+
+```go
+key := secret.SymmetricKeyFrom([]byte("\x01"))
+defer key.Destroy()
+
+nonce := secret.NewNonce(12)
+defer nonce.Destroy()
+
+ctr, _ := secret.NewCounter96(make([]byte, 12))
+n0, _ := ctr.Next()
+n1, _ := ctr.Next()
+fmt.Printf("nonce0=%x nonce1=%x\n", n0, n1)
+```
+
+### HPKE (base mode)
+
+```go
+suite := hpke.SuiteX25519ChaCha20
+pkR, skR, _ := hpke.GenerateKeyPair(rand.Reader, suite)
+
+info := []byte("hpke demo")
+enc, sender, _ := hpke.SetupBaseSender(rand.Reader, suite, pkR, info)
+ciphertext, _ := sender.Seal([]byte("aad"), []byte("secret"))
+
+receiver, _ := hpke.SetupBaseReceiver(suite, enc, skR, info)
+plaintext, _ := receiver.Open([]byte("aad"), ciphertext)
+fmt.Println(string(plaintext))
 ```
 
 ## Running tests

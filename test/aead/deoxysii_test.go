@@ -3,54 +3,80 @@ package aead_test
 import (
 	"bytes"
 	_ "embed"
-	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/AeonDave/cryptonite-go/aead"
 	testutil "github.com/AeonDave/cryptonite-go/test/internal/testutil"
 )
 
-//go:embed testdata/deoxysii_kat.json
-var deoxysIIKATData []byte
+//go:embed testdata/deoxysii_kat.txt
+var deoxysIIKATData string
 
-type deoxysVector struct {
-	Name           string  `json:"Name"`
-	Key            string  `json:"Key"`
-	Nonce          string  `json:"Nonce"`
-	AssociatedData *string `json:"AssociatedData"`
-	Message        *string `json:"Message"`
-	Sealed         string  `json:"Sealed"`
+type deoxysKATCase struct {
+	key, nonce, ad, pt, ct []byte
+}
+
+func parseDeoxysIIKAT(t *testing.T) []deoxysKATCase {
+	t.Helper()
+	lines := strings.Split(deoxysIIKATData, "\n")
+	var cases []deoxysKATCase
+	for i := 0; i < len(lines); {
+		line := strings.TrimSpace(lines[i])
+		if line == "" {
+			i++
+			continue
+		}
+		if !strings.HasPrefix(line, "Count =") {
+			t.Fatalf("unexpected format on line %d: %q", i+1, lines[i])
+		}
+		if i+5 >= len(lines) {
+			t.Fatalf("incomplete block starting at line %d", i+1)
+		}
+		keyLine := strings.TrimSpace(lines[i+1])
+		nonceLine := strings.TrimSpace(lines[i+2])
+		ptLine := strings.TrimSpace(lines[i+3])
+		adLine := strings.TrimSpace(lines[i+4])
+		ctLine := strings.TrimSpace(lines[i+5])
+		if !strings.HasPrefix(keyLine, "Key =") || !strings.HasPrefix(nonceLine, "Nonce =") ||
+			!strings.HasPrefix(ptLine, "PT =") || !strings.HasPrefix(adLine, "AD =") ||
+			!strings.HasPrefix(ctLine, "CT =") {
+			t.Fatalf("unexpected block format around line %d", i+1)
+		}
+		key := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(keyLine, "Key =")))
+		nonce := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(nonceLine, "Nonce =")))
+		pt := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(ptLine, "PT =")))
+		ad := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(adLine, "AD =")))
+		ct := testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(ctLine, "CT =")))
+		cases = append(cases, deoxysKATCase{key: key, nonce: nonce, ad: ad, pt: pt, ct: ct})
+		i += 6
+		if i < len(lines) && strings.TrimSpace(lines[i]) == "" {
+			i++
+		}
+	}
+	return cases
 }
 
 func TestDeoxysII_KAT(t *testing.T) {
-	var vectors []deoxysVector
-	if err := json.Unmarshal(deoxysIIKATData, &vectors); err != nil {
-		t.Fatalf("failed to parse vectors: %v", err)
-	}
-	if len(vectors) == 0 {
+	cases := parseDeoxysIIKAT(t)
+	if len(cases) == 0 {
 		t.Fatal("no Deoxys-II vectors parsed")
 	}
 	cipher := aead.NewDeoxysII128()
-	for idx, vec := range vectors {
-		key := testutil.MustHex(t, vec.Key)
-		nonce := testutil.MustHex(t, vec.Nonce)
-		ad := testutil.OptionalHex(t, vec.AssociatedData)
-		msg := testutil.OptionalHex(t, vec.Message)
-		sealed := testutil.MustHex(t, vec.Sealed)
-
-		got, err := cipher.Encrypt(key, nonce, ad, msg)
+	for idx, tc := range cases {
+		got, err := cipher.Encrypt(tc.key, tc.nonce, tc.ad, tc.pt)
 		if err != nil {
-			t.Fatalf("encrypt failed case %d (%s): %v", idx+1, vec.Name, err)
+			t.Fatalf("encrypt failed case %d: %v", idx+1, err)
 		}
-		if !bytes.Equal(got, sealed) {
-			t.Fatalf("encrypt mismatch case %d (%s):\n got %x\nwant %x", idx+1, vec.Name, got, sealed)
+		if !bytes.Equal(got, tc.ct) {
+			t.Fatalf("encrypt mismatch case %d (|AD|=%d, |PT|=%d):\n got %x\nwant %x", idx+1, len(tc.ad), len(tc.pt), got, tc.ct)
 		}
-		dec, err := cipher.Decrypt(key, nonce, ad, sealed)
+		dec, err := cipher.Decrypt(tc.key, tc.nonce, tc.ad, tc.ct)
 		if err != nil {
-			t.Fatalf("decrypt failed case %d (%s): %v", idx+1, vec.Name, err)
+			t.Fatalf("decrypt failed case %d: %v", idx+1, err)
 		}
-		if !bytes.Equal(dec, msg) {
-			t.Fatalf("decrypt mismatch case %d (%s):\n got %x\nwant %x", idx+1, vec.Name, dec, msg)
+		if !bytes.Equal(dec, tc.pt) {
+			t.Fatalf("decrypt mismatch case %d:\n got %x\nwant %x", idx+1, dec, tc.pt)
 		}
 	}
 }

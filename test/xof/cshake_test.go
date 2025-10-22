@@ -3,15 +3,16 @@ package xof_test
 import (
 	"bytes"
 	_ "embed"
-	"encoding/json"
+	"strconv"
+	"strings"
 	"testing"
 
 	testutil "github.com/AeonDave/cryptonite-go/test/internal/testutil"
 	"github.com/AeonDave/cryptonite-go/xof"
 )
 
-//go:embed testdata/cshake_kat.json
-var cshakeKAT []byte
+//go:embed testdata/cshake_kat.txt
+var cshakeKAT string
 
 type cshakeVectors struct {
 	CSHAKE128 []cshakeVector `json:"cshake128"`
@@ -30,8 +31,59 @@ type cshakeVector struct {
 func parseCSHAKEVectors(t *testing.T) cshakeVectors {
 	t.Helper()
 	var vectors cshakeVectors
-	if err := json.Unmarshal(cshakeKAT, &vectors); err != nil {
-		t.Fatalf("failed to unmarshal cSHAKE KAT: %v", err)
+	lines := strings.Split(cshakeKAT, "\n")
+	for i := 0; i < len(lines); {
+		line := strings.TrimSpace(lines[i])
+		if line == "" || strings.HasPrefix(line, "#") {
+			i++
+			continue
+		}
+		if !strings.HasPrefix(line, "Variant =") {
+			t.Fatalf("unexpected label at line %d: %q", i+1, lines[i])
+		}
+		variant := strings.TrimSpace(strings.TrimPrefix(line, "Variant ="))
+		if i+5 >= len(lines) {
+			t.Fatalf("incomplete block at line %d", i+1)
+		}
+		fnLine := strings.TrimSpace(lines[i+1])
+		custLine := strings.TrimSpace(lines[i+2])
+		msgLine := strings.TrimSpace(lines[i+3])
+		outLenLine := strings.TrimSpace(lines[i+4])
+		digLine := strings.TrimSpace(lines[i+5])
+		if !strings.HasPrefix(fnLine, "FunctionName =") || !strings.HasPrefix(custLine, "Customization =") ||
+			!strings.HasPrefix(msgLine, "Msg =") || !strings.HasPrefix(outLenLine, "OutLen =") ||
+			!strings.HasPrefix(digLine, "Digest =") {
+			t.Fatalf("unexpected block format near line %d", i+1)
+		}
+		fn := strings.TrimSpace(strings.TrimPrefix(fnLine, "FunctionName ="))
+		cust := strings.TrimSpace(strings.TrimPrefix(custLine, "Customization ="))
+		msg := strings.TrimSpace(strings.TrimPrefix(msgLine, "Msg ="))
+		outLenStr := strings.TrimSpace(strings.TrimPrefix(outLenLine, "OutLen ="))
+		outLen, err := strconv.Atoi(outLenStr)
+		if err != nil {
+			t.Fatalf("invalid OutLen %q near line %d: %v", outLenStr, i+1, err)
+		}
+		dig := strings.TrimSpace(strings.TrimPrefix(digLine, "Digest ="))
+		v := cshakeVector{
+			Name:          "",
+			FunctionName:  fn,
+			Customization: cust,
+			Message:       msg,
+			OutLen:        outLen,
+			Digest:        dig,
+		}
+		switch strings.ToUpper(variant) {
+		case "CSHAKE128":
+			vectors.CSHAKE128 = append(vectors.CSHAKE128, v)
+		case "CSHAKE256":
+			vectors.CSHAKE256 = append(vectors.CSHAKE256, v)
+		default:
+			t.Fatalf("unknown variant %q at line %d", variant, i+1)
+		}
+		i += 6
+		if i < len(lines) && strings.TrimSpace(lines[i]) == "" {
+			i++
+		}
 	}
 	return vectors
 }

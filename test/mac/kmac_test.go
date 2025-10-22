@@ -3,15 +3,16 @@ package mac_test
 import (
 	"bytes"
 	_ "embed"
-	"encoding/json"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/AeonDave/cryptonite-go/mac"
 	testutil "github.com/AeonDave/cryptonite-go/test/internal/testutil"
 )
 
-//go:embed testdata/kmac_kat.json
-var kmacKAT []byte
+//go:embed testdata/kmac_kat.txt
+var kmacKAT string
 
 type kmacVectors struct {
 	KMAC128 []kmacVector `json:"kmac128"`
@@ -30,8 +31,65 @@ type kmacVector struct {
 func parseKMACVectors(t *testing.T) kmacVectors {
 	t.Helper()
 	var vectors kmacVectors
-	if err := json.Unmarshal(kmacKAT, &vectors); err != nil {
-		t.Fatalf("failed to unmarshal KMAC KAT: %v", err)
+	lines := strings.Split(kmacKAT, "\n")
+	for i := 0; i < len(lines); {
+		line := strings.TrimSpace(lines[i])
+		if line == "" || strings.HasPrefix(line, "#") {
+			i++
+			continue
+		}
+		if !strings.HasPrefix(line, "Variant =") {
+			t.Fatalf("unexpected label at line %d: %q", i+1, lines[i])
+		}
+		variant := strings.TrimSpace(strings.TrimPrefix(line, "Variant ="))
+		if i+5 >= len(lines) {
+			t.Fatalf("incomplete block at line %d", i+1)
+		}
+		keyLine := strings.TrimSpace(lines[i+1])
+		custLine := strings.TrimSpace(lines[i+2])
+		msgLine := strings.TrimSpace(lines[i+3])
+		outLenLine := strings.TrimSpace(lines[i+4])
+		macLine := strings.TrimSpace(lines[i+5])
+		if !strings.HasPrefix(keyLine, "Key =") || !strings.HasPrefix(custLine, "Customization =") ||
+			!strings.HasPrefix(msgLine, "Msg =") || !strings.HasPrefix(outLenLine, "OutLen =") ||
+			!strings.HasPrefix(macLine, "MAC =") {
+			t.Fatalf("unexpected block format near line %d", i+1)
+		}
+		_ = testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(keyLine, "Key =")))
+		_ = testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(custLine, "Customization =")))
+		_ = testutil.MustHex(t, strings.TrimSpace(strings.TrimPrefix(msgLine, "Msg =")))
+		outLenStr := strings.TrimSpace(strings.TrimPrefix(outLenLine, "OutLen ="))
+		outLen, err := strconv.Atoi(outLenStr)
+		if err != nil {
+			t.Fatalf("invalid OutLen %q near line %d: %v", outLenStr, i+1, err)
+		}
+		macHex := strings.TrimSpace(strings.TrimPrefix(macLine, "MAC ="))
+		macBytes := testutil.MustHex(t, macHex)
+		v := kmacVector{
+			Name:          "",
+			Key:           strings.TrimSpace(strings.TrimPrefix(keyLine, "Key =")),
+			Customization: strings.TrimSpace(strings.TrimPrefix(custLine, "Customization =")),
+			Message:       strings.TrimSpace(strings.TrimPrefix(msgLine, "Msg =")),
+			OutLen:        outLen,
+			Mac:           strings.TrimSpace(strings.TrimPrefix(macLine, "MAC =")),
+		}
+		// Assign to appropriate variant slices to keep existing tests.
+		switch strings.ToUpper(variant) {
+		case "KMAC128":
+			vectors.KMAC128 = append(vectors.KMAC128, v)
+		case "KMAC256":
+			vectors.KMAC256 = append(vectors.KMAC256, v)
+		default:
+			t.Fatalf("unknown variant %q at line %d", variant, i+1)
+		}
+		// sanity check length matches provided MAC
+		if len(macBytes) != outLen {
+			t.Fatalf("MAC length (%d) does not match OutLen (%d) near line %d", len(macBytes), outLen, i+1)
+		}
+		i += 6
+		if i < len(lines) && strings.TrimSpace(lines[i]) == "" {
+			i++
+		}
 	}
 	return vectors
 }

@@ -1,0 +1,51 @@
+Function = LeftEncode
+Input = 0
+Output = 0100
+
+Function = LeftEncode
+Input = 1
+Output = 0101
+
+Function = LeftEncode
+Input = 65535
+Output = 02FFFF
+
+Function = LeftEncode
+Input = 65536
+Output = 03010000
+
+Function = RightEncode
+Input = 0
+Output = 0001
+
+Function = RightEncode
+Input = 1
+Output = 0101
+
+Function = RightEncode
+Input = 65535
+Output = FFFF02
+
+Function = RightEncode
+Input = 65536
+Output = 01000003
+
+Function = EncodeString
+Data = 1122
+Output = 01101122
+
+Function = Bytepad
+Data =
+W = 136
+Output = 01880000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+Function = Bytepad
+Data = FF
+W = 4
+Output = 0104FF00
+
+Function = Bytepad
+Data = AABB
+W = 4
+Output = 0104AABB
+

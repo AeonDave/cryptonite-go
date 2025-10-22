@@ -1,0 +1,44 @@
+{
+  "tuplehash128": [
+    {
+      "tuple": [
+        "616c706861",
+        "62657461",
+        "67616d6d61"
+      ],
+      "customization": "",
+      "out_len": 32,
+      "digest": "76691db034d17cbdbd24d6d3a22eea001b57f24011f30fb8bcbae2b9949ea84d"
+    }
+  ],
+  "tuplehash256": [
+    {
+      "tuple": [
+        "616c706861",
+        "62657461",
+        "67616d6d61"
+      ],
+      "customization": "637478",
+      "out_len": 64,
+      "digest": "ebd33b69f489c13316cbf1230363276e06a603348c11f6fd615158c65a3b7628759bcd0fc460519411e132bcbdabb1338c21521fd3fcfa8ad074445eea08a65e"
+    }
+  ],
+  "parallelhash128": [
+    {
+      "message": "506172616c6c656c2068617368696e672073686f77636173657320635348414b4520666c65786962696c697479",
+      "block_size": 16,
+      "customization": "",
+      "out_len": 32,
+      "digest": "8fadb6eb3a44f280bfbd2aa23c0ff5753844312c20350c0094dde9e9947ba541"
+    }
+  ],
+  "parallelhash256": [
+    {
+      "message": "506172616c6c656c2068617368696e672073686f77636173657320635348414b4520666c65786962696c697479",
+      "block_size": 24,
+      "customization": "637478",
+      "out_len": 64,
+      "digest": "2d1611f49bf47b9acfa156298721f3ba81d039795e6616f67396dd523071c0d801752ed5b296669548f89bce8fd534bdcbdd7fc6772ff2bbb7ed26035eac528e"
+    }
+  ]
+}
