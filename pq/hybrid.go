@@ -19,6 +19,9 @@ const (
 var (
 	errInvalidKeyMaterial = errors.New("pq: invalid hybrid key material")
 	errUnsupportedVersion = errors.New("pq: unsupported hybrid key version")
+	errMissingPQPublic    = errors.New("pq: missing post-quantum public key component")
+	errMissingPQPrivate   = errors.New("pq: missing post-quantum private key component")
+	errMissingPQCipher    = errors.New("pq: missing post-quantum ciphertext component")
 )
 
 // Hybrid implements a deployable hybrid key encapsulation mechanism that
@@ -105,6 +108,9 @@ func (h *Hybrid) Encapsulate(public []byte) (ciphertext, sharedSecret []byte, er
 	if len(components.postQuantum) > 0 && h.mlkem == nil {
 		return nil, nil, errors.New("pq: unexpected post-quantum key component")
 	}
+	if h.mlkem != nil && len(components.postQuantum) == 0 {
+		return nil, nil, errMissingPQPublic
+	}
 
 	classicalPriv, err := h.classical.Curve().GenerateKey(rand.Reader)
 	if err != nil {
@@ -174,6 +180,14 @@ func (h *Hybrid) Decapsulate(private, ciphertext []byte) ([]byte, error) {
 	}
 	if len(ctComponents.postQuantum) > 0 && h.mlkem == nil {
 		return nil, errors.New("pq: unexpected post-quantum ciphertext component")
+	}
+	if h.mlkem != nil {
+		if len(keyComponents.postQuantum) == 0 {
+			return nil, errMissingPQPrivate
+		}
+		if len(ctComponents.postQuantum) == 0 {
+			return nil, errMissingPQCipher
+		}
 	}
 
 	classicalPriv, err := h.classical.Curve().NewPrivateKey(keyComponents.classical)
