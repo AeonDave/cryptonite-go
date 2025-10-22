@@ -49,8 +49,8 @@ the Go `hash.Hash` type without importing algorithm-specific subpackages.
 | SHA3-256     | `hash.NewSHA3256()`        | `hash.NewSHA3256Hasher()` / `hash.Sum256`       | 256-bit (32 B) digest                               |
 | SHA3-384     | `hash.NewSHA3384()`        | `hash.NewSHA3384Hasher()` / `hash.Sum384`       | 384-bit (48 B) digest                               |
 | SHA3-512     | `hash.NewSHA3512()`        | `hash.NewSHA3512Hasher()` / `hash.Sum512`       | 512-bit (64 B) digest                               |
-| BLAKE2b      | `hash.NewBlake2bBuilder()` | `hash.NewBlake2bHasher()` / `hash.NewBlake2b()` | Configurable 1–64 B digest, optional keyed MAC mode |
-| BLAKE2s      | `hash.NewBlake2sBuilder()` | `hash.NewBlake2sHasher()` / `hash.NewBlake2s()` | Configurable 1–32 B digest, optional keyed MAC mode |
+| BLAKE2b      | `hash.NewBlake2b()` / `hash.NewBlake2bBuilder()` | `hash.NewBlake2bHasher()` | Configurable 1–64 B digest, optional keyed MAC mode |
+| BLAKE2s      | `hash.NewBlake2s()` / `hash.NewBlake2sBuilder()` | `hash.NewBlake2sHasher()` | Configurable 1–32 B digest, optional keyed MAC mode |
 | Xoodyak Hash | `hash.NewXoodyak()`        | `hash.NewXoodyakHasher()` / `hash.SumXoodyak()` | 32 B Cyclist hash                                   |
 
 #### SP 800-185 constructions
