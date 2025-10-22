@@ -315,6 +315,111 @@ func testBlake2sXOF(t *testing.T, idx int, tc blake2Case) {
 	}
 }
 
+func TestBlake2HasherRejectsOversizedKeys(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name    string
+		limit   int
+		factory func(key []byte) (cryptohash.Hasher, error)
+	}{
+		{
+			name:  "BLAKE2b/New",
+			limit: 64,
+			factory: func(key []byte) (cryptohash.Hasher, error) {
+				return cryptohash.NewBlake2bHasher(64, key)
+			},
+		},
+		{
+			name:  "BLAKE2b/Builder",
+			limit: 64,
+			factory: func(key []byte) (cryptohash.Hasher, error) {
+				return cryptohash.NewBlake2bBuilder().Key(key).Hasher()
+			},
+		},
+		{
+			name:  "BLAKE2s/New",
+			limit: 32,
+			factory: func(key []byte) (cryptohash.Hasher, error) {
+				return cryptohash.NewBlake2sHasher(32, key)
+			},
+		},
+		{
+			name:  "BLAKE2s/Builder",
+			limit: 32,
+			factory: func(key []byte) (cryptohash.Hasher, error) {
+				return cryptohash.NewBlake2sBuilder().Key(key).Hasher()
+			},
+		},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			key := make([]byte, tc.limit+1)
+			_, err := tc.factory(key)
+			if err == nil {
+				t.Fatalf("expected error for %s with %d-byte key", tc.name, len(key))
+			}
+			msg := err.Error()
+			if !strings.Contains(msg, "key too long") {
+				t.Fatalf("expected key length error, got %q", msg)
+			}
+		})
+	}
+}
+
+func TestBlake2HasherAcceptsMaximumKeys(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name    string
+		limit   int
+		factory func(key []byte) (cryptohash.Hasher, error)
+	}{
+		{
+			name:  "BLAKE2b/New",
+			limit: 64,
+			factory: func(key []byte) (cryptohash.Hasher, error) {
+				return cryptohash.NewBlake2bHasher(64, key)
+			},
+		},
+		{
+			name:  "BLAKE2b/Builder",
+			limit: 64,
+			factory: func(key []byte) (cryptohash.Hasher, error) {
+				return cryptohash.NewBlake2bBuilder().Key(key).Hasher()
+			},
+		},
+		{
+			name:  "BLAKE2s/New",
+			limit: 32,
+			factory: func(key []byte) (cryptohash.Hasher, error) {
+				return cryptohash.NewBlake2sHasher(32, key)
+			},
+		},
+		{
+			name:  "BLAKE2s/Builder",
+			limit: 32,
+			factory: func(key []byte) (cryptohash.Hasher, error) {
+				return cryptohash.NewBlake2sBuilder().Key(key).Hasher()
+			},
+		},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			key := make([]byte, tc.limit)
+			hasher, err := tc.factory(key)
+			if err != nil {
+				t.Fatalf("unexpected error for %s with %d-byte key: %v", tc.name, len(key), err)
+			}
+			if got := hasher.Hash([]byte("msg")); len(got) == 0 {
+				t.Fatalf("expected non-empty digest for %s", tc.name)
+			}
+		})
+	}
+}
+
 func readXOF(t *testing.T, x xof.XOF, length int) []byte {
 	t.Helper()
 	out := make([]byte, length)
