@@ -105,10 +105,12 @@ primitives can be swapped transparently.
 `stream.NewChaCha20` and `stream.NewXChaCha20` expose the shared `stream.Stream` interface (with `Reset`, `KeyStream`,
 and `XORKeyStream`) so applications can swap keystream generators without touching call sites.
 
-| Algorithm | Constructor             | Key | Nonce | Notes                                       | RFC / Spec                                                                                     |
-|-----------|-------------------------|-----|-------|---------------------------------------------|------------------------------------------------------------------------------------------------|
-| ChaCha20  | `stream.NewChaCha20()`  | 32B | 12B   | IETF variant with configurable counter      | [RFC 8439](https://www.rfc-editor.org/rfc/rfc8439.html)                                        |
-| XChaCha20 | `stream.NewXChaCha20()` | 32B | 24B   | HChaCha20-derived subkeys and raw keystream | [draft-irtf-cfrg-xchacha-03](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-xchacha-03) |
+| Algorithm | Constructor             | Key       | Nonce | Notes                                                | RFC / Spec
+                                                                   |
+|-----------|-------------------------|-----------|-------|------------------------------------------------------|-------------------------------------------------------------------------------|
+| AES-CTR   | `stream.NewAESCTR()`    | 16/24/32B | 12B   | 96-bit nonce with 32-bit counter (NIST layout)       | [NIST SP 800-38A](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf) |
+| ChaCha20  | `stream.NewChaCha20()`  | 32B       | 12B   | IETF variant with configurable counter               | [RFC 8439](https://www.rfc-editor.org/rfc/rfc8439.html) |
+| XChaCha20 | `stream.NewXChaCha20()` | 32B       | 24B   | HChaCha20-derived subkeys and raw keystream          | [draft-irtf-cfrg-xchacha-03](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-xchacha-03) |
 
 ### Block ciphers
 
