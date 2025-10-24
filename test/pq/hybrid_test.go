@@ -218,7 +218,7 @@ func TestHybridWithPostQuantumStub(t *testing.T) {
 	if !bytes.Equal(pqCT, stub.ciphertext) {
 		t.Fatalf("unexpected PQ ciphertext component: %x", pqCT)
 	}
-	privKey, err := base.Curve().NewPrivateKey(classicalPriv)
+	privKey, err := base.NewPrivateKey(classicalPriv)
 	if err != nil {
 		t.Fatalf("NewPrivateKey: %v", err)
 	}

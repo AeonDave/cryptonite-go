@@ -48,7 +48,7 @@ go get github.com/AeonDave/cryptonite-go
 
 ### Public Key Crypto
 - **Signatures**: Ed25519, ECDSA P-256
-- **Key Exchange**: X25519, ECDH P-256/P-384
+- **Key Exchange**: X25519, X448, ECDH P-256/P-384
 - **Post-Quantum**: Hybrid X25519+ML-KEM ready (via `pq` package)
 
 Full algorithm matrix with specs:
@@ -88,18 +88,24 @@ digest := hasher.Hash([]byte("hello world"))
 fmt.Printf("%x\n", digest)
 ```
 
-### Key Exchange (X25519)
+### Key Exchange (X25519 / X448)
 
 ```go
 import "github.com/AeonDave/cryptonite-go/ecdh"
 
 x25519 := ecdh.NewX25519()
+x448 := ecdh.NewX448()
 alicePriv, _ := x25519.GenerateKey()
 bobPriv, _ := x25519.GenerateKey()
 
 aliceShared, _ := x25519.SharedSecret(alicePriv, bobPriv.PublicKey())
 bobShared, _ := x25519.SharedSecret(bobPriv, alicePriv.PublicKey())
 // aliceShared == bobShared
+
+// X448 exposes the same API for higher security deployments.
+alice448, _ := x448.GenerateKey()
+bob448, _ := x448.GenerateKey()
+shared448, _ := x448.SharedSecret(alice448, bob448.PublicKey())
 ```
 
 ### Digital Signatures (Ed25519)

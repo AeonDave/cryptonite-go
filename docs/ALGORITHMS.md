@@ -114,6 +114,7 @@ sites.
 | Algorithm | Constructor        | Public             | Private    | Shared | Notes                     | RFC / Spec                                              |
 |-----------|--------------------|--------------------|------------|--------|---------------------------|---------------------------------------------------------|
 | X25519    | `ecdh.NewX25519()` | 32B                | 32B        | 32B    | RFC 7748 (crypto/ecdh)    | [RFC 7748](https://www.rfc-editor.org/rfc/rfc7748.html) |
+| X448      | `ecdh.NewX448()`   | 56B                | 56B        | 56B    | RFC 7748 (pure Go impl.)  | [RFC 7748](https://www.rfc-editor.org/rfc/rfc7748.html) |
 | P-256     | `ecdh.NewP256()`   | 65B (uncompressed) | 32B scalar | 32B    | Uncompressed public: 0x04 |                                                         | X || Y     | [FIPS 186-5](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf) |
 | P-384     | `ecdh.NewP384()`   | 97B (uncompressed) | 48B scalar | 48B    | Uncompressed public: 0x04 |                                                         | X || Y     | [FIPS 186-5](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf) |
 
