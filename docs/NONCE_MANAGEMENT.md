@@ -46,7 +46,7 @@ The `secret` package provides reusable counter implementations:
 
 - `secret.NewMonotonicCounter(size)` – returns a fixed-width big-endian counter. Use `Increment()` to advance and
   `Bytes()` to obtain the current value.
-- `secret.NewDeterministicNonce(key, salt, info)` – HKDF-based determinstic nonce derivation that binds context strings
+- `secret.NewDeterministicNonce(key, salt, info)` – HKDF-based deterministic nonce derivation that binds context strings
   to the output.
 - `secret.Zeroize()` – helper to clear sensitive buffers once a nonce or counter leaves scope.
 

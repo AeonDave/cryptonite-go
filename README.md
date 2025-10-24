@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/AeonDave/cryptonite-go)](https://goreportcard.com/report/github.com/AeonDave/cryptonite-go)
 ![GitHub License](https://img.shields.io/github/license/AeonDave/cryptonite-go)
 
-Modern, ultra-fast, zero-dependency cryptography library for Go 1.22+**
+Modern, ultra-fast, zero-dependency cryptography library for Go 1.22+
 Implemented using only the standard library. Battle-tested primitives, minimal attack surface, ergonomic APIs.
 
 ## Overview
@@ -156,9 +156,10 @@ Run locally:
 ```bash
 go test ./test/... -bench=. -benchmem
 ```
-or on windows
-```bash
-go test ./test/... -run='^$' -bench . -benchmem -count=1
+On Windows PowerShell, quote the empty test pattern with double quotes:
+
+```powershell
+go test ./test/... -run="^$" -bench . -benchmem -count=1
 ```
 
 ## Security
@@ -170,7 +171,7 @@ go test ./test/... -run='^$' -bench . -benchmem -count=1
 - No CGO → reduced supply chain risk
 
 ### Limitations
-- **This library has NOT been independently audited.** Do not use in production without thorough review.
+- **This library has NOT been independently audited.** Even though it is deployed in production, perform thorough internal review and threat modeling before upgrading or integrating it into new systems.
 - **Nonce management**: Caller responsible for uniqueness (use `secret.NewNonce()` or counters)
 - **Side channels**: Best-effort mitigation; validate in your threat model
 - **Algorithm selection**: Some primitives are experimental (e.g., GIFT-COFB) – prefer mainstream options (AES-GCM, ChaCha20) unless you need specific properties
@@ -188,8 +189,7 @@ See [SECURITY.md](SECURITY.md) for full policy.
   - [HPKE Usage](docs/HPKE.md) – hybrid public key encryption
   - [Post-Quantum](docs/PQ.md) – hybrid X25519+ML-KEM guide
   - [Interoperability](docs/INTEROP.md) – wire formats, encodings, gotchas
-<!-- - **Examples**: [examples/](examples/) – copy-paste ready snippets -->
-- **Testing**: [docs/TESTING.md] – KAT, fuzzing, adding test vectors
+- **Testing**: [docs/TESTING.md](docs/TESTING.md) – KAT, fuzzing, adding test vectors
 
 ## Contributing
 
