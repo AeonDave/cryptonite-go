@@ -112,6 +112,17 @@ Benchmarks on **AMD Ryzen 7 5800X 8-Core Processor** (Windows, amd64)
 | **Encapsulate** | 15,826         | -            | 2,169 B   | 31        |
 | **Decapsulate** | 15,982         | 0.40         | 1,945 B   | 28        |
 
+### ML-KEM (Kyber)
+
+| Algorithm      | Operation    | Operations/sec | ns/op   | Speed (MB/s) | Memory/op | Allocs/op |
+|----------------|--------------|----------------|---------|--------------|-----------|-----------|
+| **ML-KEM-512** | Encapsulate  | 6,448          | 155,085 | -            | 13,248 B  | 793       |
+| **ML-KEM-512** | Decapsulate  | 4,691          | 213,172 | 0.15         | 15,552 B  | 1,050     |
+| **ML-KEM-768** | Encapsulate  | 3,752          | 266,542 | -            | 22,560 B  | 1,565     |
+| **ML-KEM-768** | Decapsulate  | 3,557          | 281,125 | 0.11         | 26,016 B  | 1,950     |
+| **ML-KEM-1024** | Encapsulate  | 3,065          | 326,309 | -            | 34,704 B  | 2,593     |
+| **ML-KEM-1024** | Decapsulate  | 2,452          | 407,897 | 0.08         | 39,056 B  | 3,106     |
+
 ### Envelope
 
 | Operation | Operations/sec | Speed (MB/s) | Memory/op | Allocs/op |

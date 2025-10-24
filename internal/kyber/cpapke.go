@@ -54,7 +54,7 @@ func (k *Kyber) PKEKeyGen(seed []byte) ([]byte, []byte) {
 // Encrypt generates the encryption of a message using a public key.
 // A 32 byte long seed can be given as argument (r). If a nil seed is given, the seed is generated using Go crypto's random number generator.
 // The ciphertext returned is packed into a byte array.
-// If an error occurs during the encrpytion process, a nil array is returned.
+// If an error occurs during the encryption process, a nil array is returned.
 func (k *Kyber) Encrypt(packedPK, msg, r []byte) []byte {
 
 	if len(msg) < n/8 {
@@ -118,7 +118,7 @@ func (k *Kyber) Encrypt(packedPK, msg, r []byte) []byte {
 // Decrypt decrypts a ciphertext given a secret key.
 // The secret key and ciphertext must be give as packed byte array.
 // The recovered message is returned as byte array.
-// If an error occurs durirng the decryption process (wrong key format for example), a nil message is returned.
+// If an error occurs during the decryption process (wrong key format for example), a nil message is returned.
 func (k *Kyber) Decrypt(packedSK, c []byte) []byte {
 	if len(c) != k.SIZEC() || len(packedSK) != k.SIZEPKESK() {
 		return nil

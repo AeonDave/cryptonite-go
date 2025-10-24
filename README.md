@@ -155,6 +155,7 @@ recovered, _ := hybrid.Decapsulate(hybridSK, ct)
 
 - All tests: `go test ./...`
 - With race detector: `go test -race ./...`
+- ML-KEM / ML-DSA KATs: `go test ./test/pq -run TestMLKEMKAT` and `go test ./test/sig -run TestMLDSAKAT`
 
 Tests include KAT suites for ASCON, Xoodyak, ChaCha20‑Poly1305, AES-GCM-SIV, and AES-SIV (RFC 5297), plus tamper checks
 on tags and ciphertext.
@@ -194,6 +195,9 @@ Run locally:
 
 ```bash
 go test ./test/... -bench=. -benchmem
+
+# Focused ML-KEM profiling
+go test ./test/pq -bench=BenchmarkMLKEM -benchmem
 ```
 On Windows PowerShell, quote the empty test pattern with double quotes:
 

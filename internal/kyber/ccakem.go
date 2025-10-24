@@ -23,7 +23,7 @@ func (k *Kyber) KeyGen(seed []byte) ([]byte, []byte) {
 // Encaps generates a shared secret and the encryption of said shared secret using a given public key.
 // A 32 byte long seed can be given as argument (coins). If a nil seed is given, the seed is generated using Go crypto's random number generator.
 // The shared secret and ciphertext returned are packed into byte arrays.
-// If an error occurs during the encaps process, nil arrays are returned.
+// If an error occurs during the encapsulation process, nil arrays are returned.
 func (k *Kyber) Encaps(packedPK, coins []byte) ([]byte, []byte) {
 	if len(packedPK) != k.SIZEPK() {
 		return nil, nil
@@ -61,10 +61,10 @@ func (k *Kyber) Encaps(packedPK, coins []byte) ([]byte, []byte) {
 	return c[:], ss[:]
 }
 
-// Decaps decryps a ciphertext given a secret key and checks its validity.
+// Decaps decrypts a ciphertext given a secret key and checks its validity.
 // The secret key and ciphertext must be give as packed byte array.
 // The recovered shared secret is returned as byte array.
-// If an error occurs durirng the decapsulation process, a nil shared secret is returned.
+// If an error occurs during the decapsulation process, a nil shared secret is returned.
 func (k *Kyber) Decaps(packedSK, c []byte) []byte {
 	if len(c) != k.SIZEC() || len(packedSK) != k.SIZESK() {
 		return nil
