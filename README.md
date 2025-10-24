@@ -49,7 +49,8 @@ go get github.com/AeonDave/cryptonite-go
 ### Public Key Crypto
 - **Signatures**: Ed25519, ML-DSA-44/65/87 (Dilithium), ECDSA P-256
 - **Key Exchange**: X25519, X448, ECDH P-256/P-384
-- **Post-Quantum**: ML-DSA signatures + hybrid X25519+ML-KEM (via `pq` package)
+- **KEM**: ML-KEM-512/768/1024 (Kyber) via `pq.NewMLKEM*`
+- **Hybrid**: X25519 + ML-KEM builders (`pq.NewHybridX25519MLKEM*`)
 
 Full algorithm matrix with specs:
 See [docs/ALGORITHMS.md](docs/ALGORITHMS.md)
@@ -131,6 +132,24 @@ valid := scheme.Verify(pub, []byte("message"), signature)
 
 For deterministic signing (useful for KAT/interop), replace `sig.NewMLDSA44()` with `sig.NewDeterministicMLDSA44()` or
 derive keys from a fixed 32-byte seed via `sig.GenerateDeterministicKeyMLDSA44(seed)`.
+
+### Post-Quantum KEM (ML-KEM-768 / Kyber-768)
+
+```go
+import "github.com/AeonDave/cryptonite-go/pq"
+
+kem := pq.NewMLKEM768()
+pk, sk, _ := kem.GenerateKey()
+ciphertext, shared1, _ := kem.Encapsulate(pk)
+shared2, _ := kem.Decapsulate(sk, ciphertext)
+// shared1 == shared2
+
+hybrid := pq.NewHybridX25519MLKEM768()
+hybridPK, hybridSK, _ := hybrid.GenerateKey()
+ct, combined, _ := hybrid.Encapsulate(hybridPK)
+recovered, _ := hybrid.Decapsulate(hybridSK, ct)
+// combined == recovered
+```
 
 ## Running tests
 

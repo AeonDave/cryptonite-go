@@ -131,22 +131,21 @@ sites.
 
 ## Post-quantum key encapsulation
 
-The `kem` package defines a shared `kem.KEM` interface together with a deployable hybrid construction:
+| Algorithm    | Constructor(s)       | Public | Secret | Ciphertext | Notes                                                                                     | RFC / Spec                                                                        |
+|--------------|---------------------|--------|--------|------------|-------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|
+| ML-KEM-512   | `pq.NewMLKEM512()`  | 800B   | 1632B  | 768B       | Kyber-512; vectors under `test/pq/testdata/PQCkemKAT_ML-KEM-512.rsp`                      | [FIPS 203](https://doi.org/10.6028/NIST.FIPS.203)                                 |
+| ML-KEM-768   | `pq.NewMLKEM768()`  | 1184B  | 2400B  | 1088B      | Kyber-768; deterministic DRBG reproduced for KAT coverage                                 | [FIPS 203](https://doi.org/10.6028/NIST.FIPS.203)                                 |
+| ML-KEM-1024  | `pq.NewMLKEM1024()` | 1568B  | 3168B  | 1568B      | Kyber-1024; highest NIST level; KATs bundled alongside                                    | [FIPS 203](https://doi.org/10.6028/NIST.FIPS.203)                                 |
+| X25519 (KEM) | `kem.New()`         | 32B    | 32B    | 32B        | Classical adapter (pure Go, stdlib only) bridging existing systems                       | [RFC 7748](https://www.rfc-editor.org/rfc/rfc7748.html)                           |
 
-- `kem.New()` - classical KEM adapter built on top of the existing `ecdh` helpers (deployable today, pure Go, stdlib only).
-  The adapter lives in the `kem` package to highlight that it provides classical security and can be reused by non-PQ
-  code paths.
-- `pq.NewHybridX25519()` - versioned hybrid format that composes the X25519 exchange with an optional ML-KEM component.
-  Callers can inject a vetted ML-KEM implementation via `pq.NewHybrid(classical, mlkem)` without changing encoded
-  formats or downstream APIs.
+The Kyber implementations are derived from the round-3 reference, modernised to use Go's `crypto/sha3` primitives and wrapped behind the shared `kem.KEM` interface. Known-answer tests from the NIST submission archives ship under `test/pq/testdata`.
 
-Key material and ciphertexts produced by the hybrid construction are encoded as
-`version || len(classical) || classical || len(pq) || pq`, providing forwards compatibility when the PQ component is
-introduced.
+Hybrid constructions:
 
-To encrypt payloads, the package also includes the convenience `pq.Seal` and `pq.Open` helpers which perform the
-standard `KEM → HKDF → AEAD` flow. The envelope format embeds the encapsulated key (length-prefixed), a key-schedule
-identifier, and the AEAD ciphertext so that the receiver can deterministically reproduce the derived key/nonce pair. The
-key schedule currently covers modern AEADs such as ChaCha20-Poly1305, AES-256-GCM, AES-GCM-SIV, XChaCha20-Poly1305,
-ASCON-128a, Deoxys-II-256-128, and the AES-SIV family.
+- `pq.NewHybridX25519()` – classical-only deployment for immediate use.
+- `pq.NewHybridX25519MLKEM512()` / `pq.NewHybridX25519MLKEM768()` / `pq.NewHybridX25519MLKEM1024()` – pre-wired hybrids combining X25519 with the corresponding ML-KEM parameter sets.
+- `pq.NewHybrid(classical, mlkem)` – compose arbitrary `ecdh.KeyExchange` and `kem.KEM` implementations. Encoded public keys, private keys, and ciphertexts follow `version || len(classical) || classical || len(pq) || pq`, providing forwards compatibility as PQ components evolve.
+
+To encrypt payloads, the package also includes the convenience `pq.Seal` and `pq.Open` helpers which perform the standard `KEM -> HKDF -> AEAD` flow. The envelope format embeds the encapsulated key (length-prefixed), a key-schedule identifier, and the AEAD ciphertext so that the receiver can deterministically reproduce the derived key/nonce pair. The key schedule currently covers modern AEADs such as ChaCha20-Poly1305, AES-256-GCM, AES-GCM-SIV, XChaCha20-Poly1305, ASCON-128a, Deoxys-II-256-128, and the AES-SIV family.
+
 

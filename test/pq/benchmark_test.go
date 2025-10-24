@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/AeonDave/cryptonite-go/aead"
+	"github.com/AeonDave/cryptonite-go/kem"
 	"github.com/AeonDave/cryptonite-go/pq"
 )
 
@@ -82,4 +83,51 @@ func BenchmarkEnvelope(b *testing.B) {
 			}
 		}
 	})
+}
+
+func BenchmarkMLKEM(b *testing.B) {
+	type kemCase struct {
+		name   string
+		newKEM func() kem.KEM
+	}
+
+	cases := []kemCase{
+		{name: "ML-KEM-512", newKEM: pq.NewMLKEM512},
+		{name: "ML-KEM-768", newKEM: pq.NewMLKEM768},
+		{name: "ML-KEM-1024", newKEM: pq.NewMLKEM1024},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		b.Run(tc.name, func(b *testing.B) {
+			inst := tc.newKEM()
+			pub, priv, err := inst.GenerateKey()
+			if err != nil {
+				b.Fatalf("keygen failed: %v", err)
+			}
+			b.Run("Encapsulate", func(b *testing.B) {
+				b.ReportAllocs()
+				b.ResetTimer()
+				for i := 0; i < b.N; i++ {
+					if _, _, err := inst.Encapsulate(pub); err != nil {
+						b.Fatalf("encapsulate failed: %v", err)
+					}
+				}
+			})
+			ct, ss, err := inst.Encapsulate(pub)
+			if err != nil {
+				b.Fatalf("encapsulate failed: %v", err)
+			}
+			b.Run("Decapsulate", func(b *testing.B) {
+				b.ReportAllocs()
+				b.SetBytes(int64(len(ss)))
+				b.ResetTimer()
+				for i := 0; i < b.N; i++ {
+					if _, err := inst.Decapsulate(priv, ct); err != nil {
+						b.Fatalf("decapsulate failed: %v", err)
+					}
+				}
+			})
+		})
+	}
 }

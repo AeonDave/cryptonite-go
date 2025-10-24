@@ -22,9 +22,14 @@ Decapsulate).
 
 To integrate ML-KEM (Kyber/ML-KEM 512/768/1024):
 
-1. Import or implement a Go type satisfying `kem.KEM` for the desired ML-KEM parameter set.
-2. Pass it to `pq.NewHybrid(classical, mlkem)`.
-3. Ensure the ML-KEM public key, secret key, and ciphertext encodings follow the draft FIPS 203 byte layouts.
+1. Choose a `kem.KEM` implementation for the desired parameter set. Cryptonite-go ships pure-Go variants derived from the round-3 Kyber reference:
+   - `pq.NewMLKEM512()` / `pq.NewMLKEM768()` / `pq.NewMLKEM1024()` expose the NIST-standardised parameter sets.
+   - KAT vectors live under `test/pq/testdata` and are exercised by `TestMLKEMKAT`.
+   - Convenience hybrids `pq.NewHybridX25519MLKEM512()` (and the 768/1024 variants) wire the Kyber instances into the X25519 scaffold used elsewhere in the library.
+2. Pass the KEM to `pq.NewHybrid(classical, mlkem)` or use the provided hybrid helpers directly.
+3. Ensure ML-KEM public key, secret key, and ciphertext encodings follow the FIPS 203 byte layouts when exchanging material over the wire.
+
+These helpers rely solely on `crypto/sha3` and require no third-party dependencies.
 
 ## Envelope Helpers
 

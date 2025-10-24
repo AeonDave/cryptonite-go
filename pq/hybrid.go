@@ -55,6 +55,27 @@ func NewHybridX25519() *Hybrid {
 	return h
 }
 
+// NewHybridX25519MLKEM512 returns a Hybrid instance backed by X25519 and
+// ML-KEM-512 (Kyber-512).
+func NewHybridX25519MLKEM512() *Hybrid {
+	h, _ := NewHybrid(ecdh.NewX25519(), NewMLKEM512())
+	return h
+}
+
+// NewHybridX25519MLKEM768 returns a Hybrid instance backed by X25519 and
+// ML-KEM-768 (Kyber-768).
+func NewHybridX25519MLKEM768() *Hybrid {
+	h, _ := NewHybrid(ecdh.NewX25519(), NewMLKEM768())
+	return h
+}
+
+// NewHybridX25519MLKEM1024 returns a Hybrid instance backed by X25519 and
+// ML-KEM-1024 (Kyber-1024).
+func NewHybridX25519MLKEM1024() *Hybrid {
+	h, _ := NewHybrid(ecdh.NewX25519(), NewMLKEM1024())
+	return h
+}
+
 // GenerateKey creates a hybrid public/private key pair. When mlkem is nil only
 // the classical component is produced, resulting in a format that still allows
 // hybrid ciphertexts to be processed in the future.
