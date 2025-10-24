@@ -162,20 +162,20 @@ on tags and ciphertext.
 
 ## Benchmarks
 
-**Benchmark environment**: AMD Ryzen 7, Go 1.23, `-benchmem`
+**Benchmark environment**: AMD Ryzen 7, Go 1.22+, `-benchmem`
 
-| Category | Algorithm | Throughput | Allocs/op | B/op |
-|----------|-----------|------------|-----------|------|
-| **AEAD** | AES-GCM (AES-NI) | 1488 MB/s | 0 | 0 |
-| | ChaCha20-Poly1305 | 178 MB/s | 3 | 224 |
-| | ASCON-128a ⭐ | 223 MB/s | 3 | 208 |
-| **Hash** | BLAKE2b-512 | 742 MB/s | 2 | 128 |
-| | SHA3-256 | 38 MB/s | 1 | 32 |
-| **MAC** | Poly1305 | 3117 MB/s | 4 | 64 |
-| **Stream** | ChaCha20 | 224 MB/s | 0 | 0 |
-| **Sig** | Ed25519 Sign | 8 MB/s | 1 | 96 |
-| | Ed25519 Verify | 23 MB/s | 0 | 0 |
-| **ECDH** | X25519 | 0.82 MB/s | 1 | 64 |
+| Category   | Algorithm         | Throughput | Allocs/op | B/op |
+|------------|-------------------|------------|-----------|------|
+| **AEAD**   | AES-GCM (AES-NI)  | 1513 MB/s  | 3         | 2432 |
+|            | ChaCha20-Poly1305 | 167 MB/s   | 3         | 2192 |
+|            | ASCON-128a        | 232 MB/s   | 3         | 2192 |
+| **Hash**   | BLAKE2b-512       | 784 MB/s   | 2         | 448  |
+|            | SHA3-256          | 444 MB/s   | 1         | 32   |
+| **MAC**    | Poly1305          | 3019 MB/s  | 4         | 176  |
+| **Stream** | ChaCha20          | 218 MB/s   | 0         | 0    |
+| **Sig**    | Ed25519 Sign      | 50 MB/s    | 2         | 128  |
+|            | Ed25519 Verify    | 24 MB/s    | 0         | 0    |
+| **ECDH**   | X25519            | 0.75 MB/s  | 1         | 32   |
 
 **Highlights**:
 - Zero allocations on hot paths (AES, ChaCha20, signature verify)

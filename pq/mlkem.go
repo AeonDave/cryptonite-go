@@ -31,11 +31,11 @@ func (m *mlkem) GenerateKey() ([]byte, []byte, error) {
 	if m == nil || m.scheme == nil {
 		return nil, nil, errors.New("pq/mlkem: nil scheme")
 	}
-	pub, priv := m.scheme.KeyGen(nil)
-	if pub == nil || priv == nil {
+	pub, p := m.scheme.KeyGen(nil)
+	if pub == nil || p == nil {
 		return nil, nil, errors.New("pq/mlkem: key generation failed")
 	}
-	return append([]byte(nil), pub...), append([]byte(nil), priv...), nil
+	return append([]byte(nil), pub...), append([]byte(nil), p...), nil
 }
 
 func (m *mlkem) Encapsulate(public []byte) ([]byte, []byte, error) {
