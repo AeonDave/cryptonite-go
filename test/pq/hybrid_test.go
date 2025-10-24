@@ -84,7 +84,7 @@ func TestHybridRejectsMissingPQMaterial(t *testing.T) {
 		ciphertext:   []byte{0xAA, 0xBB, 0xCC},
 		sharedSecret: []byte("stub-mlkem-secret"),
 	}
-	hybrid, err := pq.NewHybrid(ecdh.New(), stub)
+	hybrid, err := pq.NewHybrid(ecdh.NewX25519(), stub)
 	if err != nil {
 		t.Fatalf("NewHybrid: %v", err)
 	}
@@ -133,7 +133,7 @@ func TestHybridDecapsulateMissingPQComponentsSkipsMLKEM(t *testing.T) {
 		sharedSecret: []byte("pq-secret"),
 	}
 
-	hybrid, err := pq.NewHybrid(ecdh.New(), stub)
+	hybrid, err := pq.NewHybrid(ecdh.NewX25519(), stub)
 	if err != nil {
 		t.Fatalf("NewHybrid: %v", err)
 	}
@@ -184,7 +184,7 @@ func TestHybridWithPostQuantumStub(t *testing.T) {
 		ciphertext:   []byte{0x10, 0x11, 0x12},
 		sharedSecret: []byte("mlkem-shared-secret"),
 	}
-	base := ecdh.New()
+	base := ecdh.NewX25519()
 	hybrid, err := pq.NewHybrid(base, stub)
 	if err != nil {
 		t.Fatalf("NewHybrid: %v", err)
