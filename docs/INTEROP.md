@@ -21,6 +21,8 @@ and compatibility notes.
 
 - `ecdh.NewX25519` expects 32-byte private keys and outputs 32-byte Montgomery u-coordinates. Use the standard base point
   defined in RFC 7748.
+- `ecdh.NewX448` expects 56-byte private scalars and emits 56-byte Montgomery u-coordinates. The canonical base point is
+  the little-endian encoding of the integer 5.
 - `ecdh.NewP256` / `NewP384` accept scalar private keys and return uncompressed SEC1 public points.
 
 ## HPKE Records

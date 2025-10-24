@@ -1,7 +1,6 @@
 package pq
 
 import (
-	"crypto/rand"
 	"encoding/binary"
 	"errors"
 
@@ -63,7 +62,7 @@ func (h *Hybrid) GenerateKey() (public, private []byte, err error) {
 	if h == nil {
 		return nil, nil, errors.New("pq: nil hybrid")
 	}
-	classicalPriv, err := h.classical.Curve().GenerateKey(rand.Reader)
+	classicalPriv, err := h.classical.GenerateKey()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -112,7 +111,7 @@ func (h *Hybrid) Encapsulate(public []byte) (ciphertext, sharedSecret []byte, er
 		return nil, nil, errMissingPQPublic
 	}
 
-	classicalPriv, err := h.classical.Curve().GenerateKey(rand.Reader)
+	classicalPriv, err := h.classical.GenerateKey()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -191,7 +190,7 @@ func (h *Hybrid) Decapsulate(private, ciphertext []byte) ([]byte, error) {
 		}
 	}
 
-	classicalPriv, err := h.classical.Curve().NewPrivateKey(keyComponents.classical)
+	classicalPriv, err := h.classical.NewPrivateKey(keyComponents.classical)
 	if err != nil {
 		return nil, err
 	}

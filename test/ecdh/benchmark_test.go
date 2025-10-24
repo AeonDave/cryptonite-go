@@ -12,6 +12,7 @@ func BenchmarkECDH(b *testing.B) {
 		ke   ecdh.KeyExchange
 	}{
 		{"X25519", ecdh.NewX25519()},
+		{"X448", ecdh.NewX448()},
 		{"P-256", ecdh.NewP256()},
 		{"P-384", ecdh.NewP384()},
 	}
