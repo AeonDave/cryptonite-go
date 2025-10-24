@@ -1,9 +1,9 @@
 package kyber
 
-// Mat is used to hold A
+// Mat is used to hold A.
 type Mat []Vec
 
-// expandSeed generated a KxK array of polynomials woth coefficients in [0, Q)
+// expandSeed generates a K×K matrix of polynomials with coefficients in [0, Q).
 func expandSeed(rho []byte, transpose bool, K int) Mat {
 	m := make(Mat, K)
 	for i := 0; i < K; i++ {

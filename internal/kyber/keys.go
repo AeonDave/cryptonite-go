@@ -6,18 +6,18 @@ import (
 	"crypto/sha3"
 )
 
-// PublicKey holds the pk strct
+// PublicKey holds the packed Kyber public key material.
 type PublicKey struct {
 	T   Vec    //NTT(t)
 	Rho []byte //32
 }
 
-// PKEPrivateKey holds the ak strct for Kyber's PKE scheme
+// PKEPrivateKey holds the packed secret vector for Kyber's PKE scheme.
 type PKEPrivateKey struct {
 	S Vec //NTT(s)
 }
 
-// PrivateKey holds the sk struct
+// PrivateKey holds the full Kyber CCA private key components.
 type PrivateKey struct {
 	Z   []byte
 	SkP []byte
