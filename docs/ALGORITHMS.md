@@ -21,18 +21,21 @@ This document captures the complete algorithm matrix for Cryptonite-go. It mirro
 
 ## Hashing
 
-Every hashing entry point lives under the `hash` package so callers can rely on the uniform `hash.Hasher` interface or
-the Go `hash.Hash` type without importing algorithm-specific subpackages.
+Every hashing entry point lives under the `hash` package so callers can rely on the uniform `hash.Hasher` interface or the Go `hash.Hash` type without importing algorithm-specific subpackages.
 
-| Algorithm    | Streaming constructor                            | Single-shot helper(s)                           | Notes                                              | RFC / Spec                                                                   |
-|--------------|--------------------------------------------------|-------------------------------------------------|----------------------------------------------------|------------------------------------------------------------------------------|
-| SHA3-224     | `hash.NewSHA3224()`                              | `hash.NewSHA3224Hasher()` / `hash.Sum224`       | 224-bit (28B) digest                               | [FIPS 202](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf)         |
-| SHA3-256     | `hash.NewSHA3256()`                              | `hash.NewSHA3256Hasher()` / `hash.Sum256`       | 256-bit (32B) digest                               | [FIPS 202](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf)         |
-| SHA3-384     | `hash.NewSHA3384()`                              | `hash.NewSHA3384Hasher()` / `hash.Sum384`       | 384-bit (48B) digest                               | [FIPS 202](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf)         |
-| SHA3-512     | `hash.NewSHA3512()`                              | `hash.NewSHA3512Hasher()` / `hash.Sum512`       | 512-bit (64B) digest                               | [FIPS 202](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf)         |
+| Algorithm    | Streaming constructor                            | Single-shot helper(s)                           | Notes                                             | RFC / Spec                                                                   |
+|--------------|--------------------------------------------------|-------------------------------------------------|---------------------------------------------------|------------------------------------------------------------------------------|
+| SHA-224      | `hash.NewSHA224()`                               | `hash.NewSHA224Hasher()` / `hash.SumSHA224`     | 224-bit (28B) digest                              | [FIPS 180-4](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf)     |
+| SHA-256      | `hash.NewSHA256()`                               | `hash.NewSHA256Hasher()` / `hash.SumSHA256`     | 256-bit (32B) digest                              | [FIPS 180-4](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf)     |
+| SHA-384      | `hash.NewSHA384()`                               | `hash.NewSHA384Hasher()` / `hash.SumSHA384`     | 384-bit (48B) digest                              | [FIPS 180-4](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf)     |
+| SHA-512      | `hash.NewSHA512()`                               | `hash.NewSHA512Hasher()` / `hash.SumSHA512`     | 512-bit (64B) digest                              | [FIPS 180-4](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf)     |
+| SHA3-224     | `hash.NewSHA3224()`                              | `hash.NewSHA3224Hasher()` / `hash.Sum224`       | 224-bit (28B) digest                              | [FIPS 202](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf)         |
+| SHA3-256     | `hash.NewSHA3256()`                              | `hash.NewSHA3256Hasher()` / `hash.Sum256`       | 256-bit (32B) digest                              | [FIPS 202](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf)         |
+| SHA3-384     | `hash.NewSHA3384()`                              | `hash.NewSHA3384Hasher()` / `hash.Sum384`       | 384-bit (48B) digest                              | [FIPS 202](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf)         |
+| SHA3-512     | `hash.NewSHA3512()`                              | `hash.NewSHA3512Hasher()` / `hash.Sum512`       | 512-bit (64B) digest                              | [FIPS 202](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf)         |
 | BLAKE2b      | `hash.NewBlake2b()` / `hash.NewBlake2bBuilder()` | `hash.NewBlake2bHasher()`                       | Configurable 1–64B digest, optional keyed MAC mode | [RFC 7693](https://www.rfc-editor.org/rfc/rfc7693.html)                      |
 | BLAKE2s      | `hash.NewBlake2s()` / `hash.NewBlake2sBuilder()` | `hash.NewBlake2sHasher()`                       | Configurable 1–32B digest, optional keyed MAC mode | [RFC 7693](https://www.rfc-editor.org/rfc/rfc7693.html)                      |
-| Xoodyak Hash | `hash.NewXoodyak()`                              | `hash.NewXoodyakHasher()` / `hash.SumXoodyak()` | 32B Cyclist hash                                   | [Xoodyak specification](https://keccak.team/files/Xoodyak-specification.pdf) |
+| Xoodyak Hash | `hash.NewXoodyak()`                              | `hash.NewXoodyakHasher()` / `hash.SumXoodyak()` | 32B Cyclist hash                                 | [Xoodyak specification](https://keccak.team/files/Xoodyak-specification.pdf) |
 
 ### SP 800-185 constructions
 
