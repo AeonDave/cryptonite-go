@@ -29,7 +29,7 @@ var _ KEM = (*Adapter)(nil)
 
 // New returns a ready-to-use X25519-based kem.KEM implementation.
 func New() KEM {
-	return &Adapter{ke: ecdh.New()}
+	return &Adapter{ke: ecdh.NewX25519()}
 }
 
 // GenerateKey creates a fresh X25519 key pair and returns the encoded public

@@ -52,7 +52,7 @@ func NewHybrid(classical ecdh.KeyExchange, mlkem kem.KEM) (*Hybrid, error) {
 // post-quantum component. It is intended as an immediate, deployable hybrid
 // construction until a vetted ML-KEM implementation is available.
 func NewHybridX25519() *Hybrid {
-	h, _ := NewHybrid(ecdh.New(), nil)
+	h, _ := NewHybrid(ecdh.NewX25519(), nil)
 	return h
 }
 

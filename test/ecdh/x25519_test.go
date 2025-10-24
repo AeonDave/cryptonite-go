@@ -27,15 +27,15 @@ func TestX25519RFC7748Vectors(t *testing.T) {
 	}
 
 	for i, tc := range cases {
-		priv, err := xdh.NewPrivateKey(testutil.MustHex(t, tc.scalar))
+		priv, err := xdh.NewPrivateKeyX25519(testutil.MustHex(t, tc.scalar))
 		if err != nil {
 			t.Fatalf("case %d: NewPrivateKey failed: %v", i, err)
 		}
-		pub, err := xdh.NewPublicKey(testutil.MustHex(t, tc.u))
+		pub, err := xdh.NewPublicKeyX25519(testutil.MustHex(t, tc.u))
 		if err != nil {
 			t.Fatalf("case %d: NewPublicKey failed: %v", i, err)
 		}
-		out, err := xdh.SharedSecret(priv, pub)
+		out, err := xdh.SharedSecretX25519(priv, pub)
 		if err != nil {
 			t.Fatalf("case %d: SharedSecret failed: %v", i, err)
 		}
@@ -46,19 +46,19 @@ func TestX25519RFC7748Vectors(t *testing.T) {
 }
 
 func TestX25519GenerateKey(t *testing.T) {
-	privA, err := xdh.GenerateKey()
+	privA, err := xdh.GenerateKeyX25519()
 	if err != nil {
 		t.Fatalf("GenerateKey A failed: %v", err)
 	}
-	privB, err := xdh.GenerateKey()
+	privB, err := xdh.GenerateKeyX25519()
 	if err != nil {
 		t.Fatalf("GenerateKey B failed: %v", err)
 	}
-	secretA, err := xdh.SharedSecret(privA, privB.PublicKey())
+	secretA, err := xdh.SharedSecretX25519(privA, privB.PublicKey())
 	if err != nil {
 		t.Fatalf("SharedSecret A failed: %v", err)
 	}
-	secretB, err := xdh.SharedSecret(privB, privA.PublicKey())
+	secretB, err := xdh.SharedSecretX25519(privB, privA.PublicKey())
 	if err != nil {
 		t.Fatalf("SharedSecret B failed: %v", err)
 	}
@@ -68,7 +68,7 @@ func TestX25519GenerateKey(t *testing.T) {
 }
 
 func TestX25519Interface(t *testing.T) {
-	ke := xdh.New()
+	ke := xdh.NewX25519()
 	priv, err := ke.GenerateKey()
 	if err != nil {
 		t.Fatalf("GenerateKey via interface failed: %v", err)
