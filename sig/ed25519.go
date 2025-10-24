@@ -1,6 +1,7 @@
 package sig
 
 import (
+	"crypto"
 	"crypto/ed25519"
 	"crypto/rand"
 	"errors"
@@ -13,6 +14,15 @@ const (
 	PrivateKeySize = ed25519.PrivateKeySize
 	SeedSize       = ed25519.SeedSize
 	SignatureSize  = ed25519.SignatureSize
+)
+
+// Options selects Ed25519 variants when signing or verifying with options.
+type Options = ed25519.Options
+
+var (
+	errInvalidPrivateKey = errors.New("sig: invalid Ed25519 private key length")
+	errInvalidPublicKey  = errors.New("sig: invalid Ed25519 public key length")
+	errInvalidSignature  = errors.New("sig: invalid Ed25519 signature length")
 )
 
 type ed25519Scheme struct{}
@@ -58,11 +68,11 @@ func (ed25519Scheme) GenerateKey() ([]byte, []byte, error) {
 }
 
 func (ed25519Scheme) Sign(private []byte, msg []byte) ([]byte, error) {
-	if len(private) != PrivateKeySize {
-		return nil, errors.New("sig: invalid Ed25519 private key length")
+	sig, err := SignWithOptions(ed25519.PrivateKey(private), msg, nil)
+	if err != nil {
+		return nil, err
 	}
-	sig := ed25519.Sign(private, msg)
-	return append([]byte(nil), sig...), nil
+	return sig, nil
 }
 
 func (ed25519Scheme) Verify(public []byte, msg, signature []byte) bool {
@@ -70,4 +80,36 @@ func (ed25519Scheme) Verify(public []byte, msg, signature []byte) bool {
 		return false
 	}
 	return ed25519.Verify(public, msg, signature)
+}
+
+// SignWithOptions signs msg using priv with the supplied options. The returned
+// signature is copied to a fresh slice.
+func SignWithOptions(priv ed25519.PrivateKey, msg []byte, opts *ed25519.Options) ([]byte, error) {
+	if len(priv) != PrivateKeySize {
+		return nil, errInvalidPrivateKey
+	}
+	var signerOpts crypto.SignerOpts = crypto.Hash(0)
+	if opts != nil {
+		signerOpts = opts
+	}
+	sig, err := priv.Sign(rand.Reader, msg, signerOpts)
+	if err != nil {
+		return nil, err
+	}
+	return append([]byte(nil), sig...), nil
+}
+
+// VerifyWithOptions reports whether signature is valid for msg under pub with
+// the supplied options. It returns a nil error when verification succeeds.
+func VerifyWithOptions(pub ed25519.PublicKey, msg, signature []byte, opts *ed25519.Options) error {
+	if len(pub) != PublicKeySize {
+		return errInvalidPublicKey
+	}
+	if len(signature) != SignatureSize {
+		return errInvalidSignature
+	}
+	if opts == nil {
+		opts = &ed25519.Options{Hash: crypto.Hash(0)}
+	}
+	return ed25519.VerifyWithOptions(pub, msg, signature, opts)
 }

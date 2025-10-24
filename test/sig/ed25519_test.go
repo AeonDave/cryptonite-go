@@ -2,6 +2,9 @@ package sig_test
 
 import (
 	"bytes"
+	"crypto"
+	"crypto/ed25519"
+	"crypto/sha512"
 	"testing"
 
 	sig "github.com/AeonDave/cryptonite-go/sig"
@@ -80,5 +83,64 @@ func TestEd25519SchemeInterface(t *testing.T) {
 	}
 	if scheme.Verify(pub, []byte("tamper"), signature) {
 		t.Fatalf("Verify succeeded for tampered message")
+	}
+}
+
+func TestEd25519SignVerifyWithOptions(t *testing.T) {
+	seed := testutil.MustHex(t, "833FE62409237B9D62EC77587520911E9A759CEC1D19755B7DA901B96DCA3D42")
+	pub, priv, err := sig.FromSeed(seed)
+	if err != nil {
+		t.Fatalf("FromSeed failed: %v", err)
+	}
+
+	msg := []byte("context message")
+	opts := &sig.Options{Context: "example"}
+	signature, err := sig.SignWithOptions(priv, msg, opts)
+	if err != nil {
+		t.Fatalf("SignWithOptions failed: %v", err)
+	}
+	if err := sig.VerifyWithOptions(pub, msg, signature, opts); err != nil {
+		t.Fatalf("VerifyWithOptions failed: %v", err)
+	}
+	if err := sig.VerifyWithOptions(pub, []byte("tamper"), signature, opts); err == nil {
+		t.Fatalf("VerifyWithOptions succeeded for tampered message")
+	}
+}
+
+func TestEd25519SignVerifyPrehashed(t *testing.T) {
+	seed := testutil.MustHex(t, "9D61B19DEFFD5A60BA844AF492EC2CC44449C5697B326919703BAC031CAE7F60")
+	pub, priv, err := sig.FromSeed(seed)
+	if err != nil {
+		t.Fatalf("FromSeed failed: %v", err)
+	}
+
+	sum := sha512.Sum512([]byte("prehash"))
+	opts := &sig.Options{Hash: crypto.SHA512}
+	signature, err := sig.SignWithOptions(priv, sum[:], opts)
+	if err != nil {
+		t.Fatalf("SignWithOptions failed: %v", err)
+	}
+	if err := sig.VerifyWithOptions(pub, sum[:], signature, opts); err != nil {
+		t.Fatalf("VerifyWithOptions failed: %v", err)
+	}
+	if err := sig.VerifyWithOptions(pub, []byte("prehash"), signature, opts); err == nil {
+		t.Fatalf("VerifyWithOptions succeeded on unhashed message")
+	}
+}
+
+func TestEd25519WithOptionsErrors(t *testing.T) {
+	msg := []byte("msg")
+	if _, err := sig.SignWithOptions(ed25519.PrivateKey(make([]byte, sig.PrivateKeySize-1)), msg, nil); err == nil {
+		t.Fatalf("expected SignWithOptions to reject short key")
+	}
+	pub := ed25519.PublicKey(make([]byte, sig.PublicKeySize-1))
+	signature := make([]byte, sig.SignatureSize)
+	if err := sig.VerifyWithOptions(pub, msg, signature, nil); err == nil {
+		t.Fatalf("expected VerifyWithOptions to reject short public key")
+	}
+	pub = ed25519.PublicKey(make([]byte, sig.PublicKeySize))
+	signature = make([]byte, sig.SignatureSize-1)
+	if err := sig.VerifyWithOptions(pub, msg, signature, nil); err == nil {
+		t.Fatalf("expected VerifyWithOptions to reject short signature")
 	}
 }

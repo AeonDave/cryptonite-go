@@ -105,12 +105,12 @@ primitives can be swapped transparently.
 `stream.NewChaCha20` and `stream.NewXChaCha20` expose the shared `stream.Stream` interface (with `Reset`, `KeyStream`,
 and `XORKeyStream`) so applications can swap keystream generators without touching call sites.
 
-| Algorithm | Constructor             | Key       | Nonce | Notes                                                | RFC / Spec
-                                                                   |
-|-----------|-------------------------|-----------|-------|------------------------------------------------------|-------------------------------------------------------------------------------|
-| AES-CTR   | `stream.NewAESCTR()`    | 16/24/32B | 12B   | 96-bit nonce with 32-bit counter (NIST layout)       | [NIST SP 800-38A](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf) |
-| ChaCha20  | `stream.NewChaCha20()`  | 32B       | 12B   | IETF variant with configurable counter               | [RFC 8439](https://www.rfc-editor.org/rfc/rfc8439.html) |
-| XChaCha20 | `stream.NewXChaCha20()` | 32B       | 24B   | HChaCha20-derived subkeys and raw keystream          | [draft-irtf-cfrg-xchacha-03](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-xchacha-03) |
+| Algorithm | Constructor             | Key       | Nonce | Notes                                          | RFC / Spec                                                                 |
+|-----------|-------------------------|-----------|-------|------------------------------------------------|---------------------------------------------------------------------------|
+| AES-CTR   | `stream.NewAESCTR()`    | 16/24/32B | 12B   | 96-bit nonce with 32-bit counter (NIST layout) | [NIST SP 800-38A](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf) |
+| ChaCha20  | `stream.NewChaCha20()`  | 32B       | 12B   | IETF variant with configurable counter         | [RFC 8439](https://www.rfc-editor.org/rfc/rfc8439.html)                   |
+| XChaCha20 | `stream.NewXChaCha20()` | 32B       | 24B   | HChaCha20-derived subkeys and raw keystream    | [draft-irtf-cfrg-xchacha-03](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-xchacha-03) |
+
 
 ### Block ciphers
 
@@ -128,6 +128,18 @@ Block primitives are instantiated through `block.NewAES128` / `block.NewAES256`,
 |-------------|----------------------|--------------------|------------|----------------------|---------------------------------------------------------------------------------|--------------------------------------------------------------------------|
 | Ed25519     | `sig.NewEd25519()`   | 32B                | 64B        | 64B                  | Deterministic; `sig.FromSeed(32B)` supported                                    | [RFC 8032](https://www.rfc-editor.org/rfc/rfc8032.html)                  |
 | ECDSA P-256 | `sig.NewECDSAP256()` | 65B (uncompressed) | 32B scalar | ASN.1 DER (variable) | Helpers: `sig.GenerateKeyECDSAP256`, `sig.SignECDSAP256`, `sig.VerifyECDSAP256` | [FIPS 186-5](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf) |
+
+Ed25519 builds directly on Go's standard library implementation (`crypto/ed25519`) and re-exports the canonical buffer
+sizes via `sig.PublicKeySize`, `sig.PrivateKeySize`, `sig.SeedSize`, and `sig.SignatureSize`. The package also provides
+an alias for `ed25519.Options` together with helpers that cover all RFC 8032 variants:
+
+- `sig.SignWithOptions(priv, msg, opts)` – supports standard, context-bound, and pre-hash signing through the stdlib's
+  `ed25519.PrivateKey.Sign` API.
+- `sig.VerifyWithOptions(pub, msg, sig, opts)` – validates inputs, defaults to RFC 8032 parameters, and dispatches to
+  `crypto/ed25519.VerifyWithOptions`.
+
+These additions allow advanced Ed25519 flows without reimplementing the algorithm or importing `crypto/ed25519` at call
+sites.
 
 | Algorithm | Constructor      | Public             | Private    | Shared | Notes                                   | RFC / Spec                                                               |
 |-----------|------------------|--------------------|------------|--------|-----------------------------------------|--------------------------------------------------------------------------|
