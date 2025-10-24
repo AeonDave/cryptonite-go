@@ -1,0 +1,43 @@
+# Post-Quantum Integration
+
+Cryptonite-go approaches post-quantum readiness through hybrid KEM constructions that pair classical elliptic-curve
+schemes with pluggable ML-KEM implementations.
+
+## Hybrid Format Overview
+
+- **Versioning** – Hybrids produced by `pq.NewHybrid` begin with a version byte so new PQ algorithms can be introduced
+  without breaking decoders.
+- **Length prefixes** – Classical and PQ ciphertexts are both length-prefixed, enabling variable-size payloads and simple
+  framing.
+- **Key schedule** – Derived shared secrets feed HKDF (SHA-256) to produce AEAD keys and nonces. The HKDF info string
+  encodes the chosen AEAD to ensure domain separation.
+
+## Classical Component
+
+The default classical KEM is `kem.New()`, which wraps X25519 or P-256 ECDH and exposes the shared `kem.KEM` interface.
+Callers can substitute their own classical implementation if they match the same interface (GenerateKey, Encapsulate,
+Decapsulate).
+
+## ML-KEM Component
+
+To integrate ML-KEM (Kyber/ML-KEM 512/768/1024):
+
+1. Import or implement a Go type satisfying `kem.KEM` for the desired ML-KEM parameter set.
+2. Pass it to `pq.NewHybrid(classical, mlkem)`.
+3. Ensure the ML-KEM public key, secret key, and ciphertext encodings follow the draft FIPS 203 byte layouts.
+
+## Envelope Helpers
+
+`pq.Seal` and `pq.Open` provide a turnkey envelope construction:
+
+- The sender encapsulates via both classical and PQ components, concatenates the ciphertexts, and derives AEAD keys.
+- The receiver decapsulates each component independently and recombines secrets. If the PQ side fails, implementations
+  should treat the message as invalid even if the classical component succeeds.
+
+## Key Management Tips
+
+- **Rotate keys** regularly: publish new hybrid public keys once PQ implementations are updated.
+- **Secure storage**: Store ML-KEM secret keys with strong access controls; they are typically larger than classical keys.
+- **Fallbacks**: If the PQ component is unavailable, degrade gracefully by using the classical KEM only, but log the event
+  so operators are aware of reduced security.
+
