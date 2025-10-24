@@ -40,6 +40,10 @@ func BenchmarkHashers(b *testing.B) {
 		name string
 		ctor func() cryptohash.Hasher
 	}{
+		{"SHA-224", func() cryptohash.Hasher { return cryptohash.NewSHA224Hasher() }},
+		{"SHA-256", func() cryptohash.Hasher { return cryptohash.NewSHA256Hasher() }},
+		{"SHA-384", func() cryptohash.Hasher { return cryptohash.NewSHA384Hasher() }},
+		{"SHA-512", func() cryptohash.Hasher { return cryptohash.NewSHA512Hasher() }},
 		{"SHA3-224", func() cryptohash.Hasher { return cryptohash.NewSHA3224Hasher() }},
 		{"SHA3-256", func() cryptohash.Hasher { return cryptohash.NewSHA3256Hasher() }},
 		{"SHA3-384", func() cryptohash.Hasher { return cryptohash.NewSHA3384Hasher() }},
