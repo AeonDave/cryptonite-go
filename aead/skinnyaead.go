@@ -515,7 +515,7 @@ func skinnyAddKeyInv(state *[4][4]byte, keyCells *[3][4][4]byte) {
 		}
 	}
 
-	for i := 0; i < 2; i++ {
+	for i := 2; i < 4; i++ {
 		for j := 0; j < 4; j++ {
 			tmp[1][i][j] = ((tmp[1][i][j] >> 1) & 0x7f) ^ ((tmp[1][i][j] << 7) & 0x80) ^ ((tmp[1][i][j] << 1) & 0x80)
 			tmp[2][i][j] = ((tmp[2][i][j] << 1) & 0xfe) ^ ((tmp[2][i][j] >> 7) & 0x01) ^ ((tmp[2][i][j] >> 5) & 0x01)
