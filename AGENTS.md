@@ -4,30 +4,30 @@ This Agents.md file provides comprehensive guidance for AI agents working with t
 
 ## Project Structure for AI Agents Navigation
 
+- `/`: Root files include `go.mod` (specifies Go 1.22+ and module path), `README.md` (documentation and examples), `SECURITY.md` (policy), `CONTRIBUTING.md` (contributor guidelines), `LICENSE`, and `.gitignore`.
 - `/aead`: AEAD implementations, including algorithms like ASCON-128a, Xoodyak, ChaCha20-Poly1305, AES-GCM, etc.
-- `/hash`: Hashing functions and interfaces, supporting SHA3, BLAKE2, Xoodyak, and SP 800-185 constructions.
-- `/xof`: Extendable-Output Functions (XOF) like SHAKE, BLAKE2 XOF, and Xoodyak XOF.
-- `/kdf`: Key Derivation Functions including HKDF, PBKDF2, Argon2id, and scrypt.
-- `/mac`: Message Authentication Codes such as HMAC-SHA256 and Poly1305.
-- `/stream`: Stream ciphers like ChaCha20 and XChaCha20.
 - `/block`: Block ciphers, primarily AES-128 and AES-256 wrappers.
-- `/sig`: Signature algorithms including Ed25519 and ECDSA P-256.
 - `/ecdh`: Elliptic Curve Diffie-Hellman for X25519, P-256, and P-384.
+- `/hash`: Hashing functions and interfaces, supporting SHA3, BLAKE2, Xoodyak, and SP 800-185 constructions.
 - `/hpke`: Hybrid Public Key Encryption implementations.
+- `/kdf`: Key Derivation Functions including HKDF, PBKDF2, Argon2id, and scrypt.
 - `/kem`: Key Encapsulation Mechanisms (KEM) adapters, such as X25519 KEM.
+- `/mac`: Message Authentication Codes such as HMAC-SHA256 and Poly1305.
 - `/pq`: Post-quantum KEMs and signatures, including hybrid constructions.
+- `/sig`: Signature algorithms including Ed25519 and ECDSA P-256.
+- `/stream`: Stream ciphers like ChaCha20 and XChaCha20.
+- `/xof`: Extendable-Output Functions (XOF) like SHAKE, BLAKE2 XOF, and Xoodyak XOF.
 - `/secret`: Helpers for secret material management, including symmetric keys, nonces, and counters.
 - `/internal`: Internal implementations and primitives shared across packages (e.g., BLAKE2b, ChaCha20, Keccak).
-- `/test`: Test suites with known-answer tests, Wycheproof vectors, and fuzzing harnesses. Each package has its own
-  tests with /testdata test vectors.
-- `/`: Root files include `go.mod` (specifies Go 1.22+ and module path), `README.md` (documentation and examples),
-  `LICENSE`, and `.gitignore`.
+- `/test`: Test suites with known-answer tests, Wycheproof vectors, and fuzzing harnesses. Each package has its own tests with /testdata test vectors.
+
 
 ## Coding Conventions for AI Agents
 
 ### General Conventions for Agents.md Implementation
 
 - Use Go 1.22+ as specified in `go.mod`; ensure compatibility with standard library only (no external dependencies).
+- Never import libs except for the standard library. This is a security-focused library without external dependencies.
 - Follow Go naming conventions: exported identifiers start with capital letters, use camelCase for unexported.
 - Handle errors explicitly; return errors from functions rather than panicking in library code.
 - Use interfaces consistently (e.g., `aead.Aead`, `hash.Hasher`, `xof.XOF`) for polymorphism and testability.
