@@ -1,7 +1,7 @@
 # Post-Quantum Integration
 
 Cryptonite-go approaches post-quantum readiness through hybrid KEM constructions that pair classical elliptic-curve
-schemes with pluggable ML-KEM implementations.
+schemes with pluggable ML-KEM implementations, and through first-class ML-DSA (Dilithium) signature support.
 
 ## Hybrid Format Overview
 
@@ -40,4 +40,13 @@ To integrate ML-KEM (Kyber/ML-KEM 512/768/1024):
 - **Secure storage**: Store ML-KEM secret keys with strong access controls; they are typically larger than classical keys.
 - **Fallbacks**: If the PQ component is unavailable, degrade gracefully by using the classical KEM only, but log the event
   so operators are aware of reduced security.
+
+## ML-DSA Signatures
+
+- `sig.NewMLDSA44/65/87()` expose the NIST-standardised Dilithium (ML-DSA) variants with randomized signing by default.
+- Deterministic constructors (`sig.NewDeterministicMLDSAxx`) and seed-based key generation helpers enable KAT reproduction
+  and strict interoperability testing.
+- All implementations are pure Go with no third-party dependencies and share the same `sig.Signature` interface as
+  classical schemes, making it straightforward to slot ML-DSA into existing signing pipelines.
+- Official NIST KAT vectors are vendored under `test/sig/testdata` and executed by `TestMLDSAKAT`.
 

@@ -47,9 +47,9 @@ go get github.com/AeonDave/cryptonite-go
 - **Stream**: ChaCha20, XChaCha20, AES-CTR
 
 ### Public Key Crypto
-- **Signatures**: Ed25519, ECDSA P-256
+- **Signatures**: Ed25519, ML-DSA-44/65/87 (Dilithium), ECDSA P-256
 - **Key Exchange**: X25519, X448, ECDH P-256/P-384
-- **Post-Quantum**: Hybrid X25519+ML-KEM ready (via `pq` package)
+- **Post-Quantum**: ML-DSA signatures + hybrid X25519+ML-KEM (via `pq` package)
 
 Full algorithm matrix with specs:
 See [docs/ALGORITHMS.md](docs/ALGORITHMS.md)
@@ -117,6 +117,20 @@ pub, priv, _ := sig.GenerateKey()
 signature := sig.Sign(priv, []byte("message"))
 valid := sig.Verify(pub, []byte("message"), signature)
 ```
+
+### Post-Quantum Signatures (ML-DSA-44 / Dilithium-2)
+
+```go
+import "github.com/AeonDave/cryptonite-go/sig"
+
+scheme := sig.NewMLDSA44()
+pub, priv, _ := scheme.GenerateKey()
+signature, _ := scheme.Sign(priv, []byte("message"))
+valid := scheme.Verify(pub, []byte("message"), signature)
+```
+
+For deterministic signing (useful for KAT/interop), replace `sig.NewMLDSA44()` with `sig.NewDeterministicMLDSA44()` or
+derive keys from a fixed 32-byte seed via `sig.GenerateDeterministicKeyMLDSA44(seed)`.
 
 ## Running tests
 

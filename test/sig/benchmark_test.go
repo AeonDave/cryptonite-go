@@ -27,6 +27,36 @@ func BenchmarkSignatures(b *testing.B) {
 		b.Fatalf("ed25519 sign failed: %v", err)
 	}
 
+	ml44 := sig.NewDeterministicMLDSA44()
+	ml44Pub, ml44Priv, err := ml44.GenerateKey()
+	if err != nil {
+		b.Fatalf("mldsa44 keygen failed: %v", err)
+	}
+	ml44Sig, err := ml44.Sign(ml44Priv, msg)
+	if err != nil {
+		b.Fatalf("mldsa44 sign failed: %v", err)
+	}
+
+	ml65 := sig.NewDeterministicMLDSA65()
+	ml65Pub, ml65Priv, err := ml65.GenerateKey()
+	if err != nil {
+		b.Fatalf("mldsa65 keygen failed: %v", err)
+	}
+	ml65Sig, err := ml65.Sign(ml65Priv, msg)
+	if err != nil {
+		b.Fatalf("mldsa65 sign failed: %v", err)
+	}
+
+	ml87 := sig.NewDeterministicMLDSA87()
+	ml87Pub, ml87Priv, err := ml87.GenerateKey()
+	if err != nil {
+		b.Fatalf("mldsa87 keygen failed: %v", err)
+	}
+	ml87Sig, err := ml87.Sign(ml87Priv, msg)
+	if err != nil {
+		b.Fatalf("mldsa87 sign failed: %v", err)
+	}
+
 	b.Run("Ed25519/Sign", func(b *testing.B) {
 		b.ReportAllocs()
 		b.SetBytes(int64(len(msg)))
@@ -44,6 +74,72 @@ func BenchmarkSignatures(b *testing.B) {
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			if !ed.Verify(edPub, msg, edSig) {
+				b.Fatalf("verify failed")
+			}
+		}
+	})
+
+	b.Run("MLDSA44/Sign", func(b *testing.B) {
+		b.ReportAllocs()
+		b.SetBytes(int64(len(msg)))
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			if _, err := ml44.Sign(ml44Priv, msg); err != nil {
+				b.Fatalf("sign failed: %v", err)
+			}
+		}
+	})
+
+	b.Run("MLDSA44/Verify", func(b *testing.B) {
+		b.ReportAllocs()
+		b.SetBytes(int64(len(msg)))
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			if !ml44.Verify(ml44Pub, msg, ml44Sig) {
+				b.Fatalf("verify failed")
+			}
+		}
+	})
+
+	b.Run("MLDSA65/Sign", func(b *testing.B) {
+		b.ReportAllocs()
+		b.SetBytes(int64(len(msg)))
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			if _, err := ml65.Sign(ml65Priv, msg); err != nil {
+				b.Fatalf("sign failed: %v", err)
+			}
+		}
+	})
+
+	b.Run("MLDSA65/Verify", func(b *testing.B) {
+		b.ReportAllocs()
+		b.SetBytes(int64(len(msg)))
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			if !ml65.Verify(ml65Pub, msg, ml65Sig) {
+				b.Fatalf("verify failed")
+			}
+		}
+	})
+
+	b.Run("MLDSA87/Sign", func(b *testing.B) {
+		b.ReportAllocs()
+		b.SetBytes(int64(len(msg)))
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			if _, err := ml87.Sign(ml87Priv, msg); err != nil {
+				b.Fatalf("sign failed: %v", err)
+			}
+		}
+	})
+
+	b.Run("MLDSA87/Verify", func(b *testing.B) {
+		b.ReportAllocs()
+		b.SetBytes(int64(len(msg)))
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			if !ml87.Verify(ml87Pub, msg, ml87Sig) {
 				b.Fatalf("verify failed")
 			}
 		}

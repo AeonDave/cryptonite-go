@@ -95,10 +95,18 @@ Block primitives are instantiated through `block.NewAES128` / `block.NewAES256`,
 
 ## Signatures
 
-| Algorithm   | Constructor(s)       | Public             | Private    | Signature            | Notes                                                                           | RFC / Spec                                                               |
-|-------------|----------------------|--------------------|------------|----------------------|---------------------------------------------------------------------------------|--------------------------------------------------------------------------|
-| Ed25519     | `sig.NewEd25519()`   | 32B                | 64B        | 64B                  | Deterministic; `sig.FromSeed(32B)` supported                                    | [RFC 8032](https://www.rfc-editor.org/rfc/rfc8032.html)                  |
-| ECDSA P-256 | `sig.NewECDSAP256()` | 65B (uncompressed) | 32B scalar | ASN.1 DER (variable) | Helpers: `sig.GenerateKeyECDSAP256`, `sig.SignECDSAP256`, `sig.VerifyECDSAP256` | [FIPS 186-5](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf) |
+| Algorithm   | Constructor(s)                                                   | Public             | Private    | Signature | Notes                                                                                                     | RFC / Spec                                                                         |
+|-------------|------------------------------------------------------------------|--------------------|------------|-----------|-----------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| ML-DSA-44   | `sig.NewMLDSA44()`<br>`sig.NewDeterministicMLDSA44()`            | 1312B             | 2528B      | 2420B     | Randomised by default; deterministic helper + seed-based keygen via `sig.GenerateDeterministicKeyMLDSA44` | [FIPS 204](https://doi.org/10.6028/NIST.FIPS.204)                                  |
+| ML-DSA-65   | `sig.NewMLDSA65()`<br>`sig.NewDeterministicMLDSA65()`            | 1952B             | 4000B      | 3293B     | Same API as ML-DSA-44 with larger parameters                                                             | [FIPS 204](https://doi.org/10.6028/NIST.FIPS.204)                                  |
+| ML-DSA-87   | `sig.NewMLDSA87()`<br>`sig.NewDeterministicMLDSA87()`            | 2592B             | 4864B      | 4595B     | Highest NIST security level; KAT vectors shipped under `test/sig/testdata`                               | [FIPS 204](https://doi.org/10.6028/NIST.FIPS.204)                                  |
+| Ed25519     | `sig.NewEd25519()`                                               | 32B               | 64B        | 64B       | Deterministic; `sig.FromSeed(32B)` supported                                                              | [RFC 8032](https://www.rfc-editor.org/rfc/rfc8032.html)                            |
+| ECDSA P-256 | `sig.NewECDSAP256()`                                             | 65B (uncompressed) | 32B scalar | DER       | Helpers: `sig.GenerateKeyECDSAP256`, `sig.SignECDSAP256`, `sig.VerifyECDSAP256`                           | [FIPS 186-5](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf)           |
+
+The ML-DSA wrappers derive from the official Dilithium round-3 reference, modernised to use Go's standard library
+shake primitives. They default to randomized signing but expose deterministic constructors and seed-based key
+generation helpers for interoperability/KAT reproduction. Known-answer tests ship under `test/sig/testdata` directly
+from the NIST submission archives.
 
 Ed25519 builds directly on Go's standard library implementation (`crypto/ed25519`) and re-exports the canonical buffer
 sizes via `sig.PublicKeySize`, `sig.PrivateKeySize`, `sig.SeedSize`, and `sig.SignatureSize`. The package also provides
