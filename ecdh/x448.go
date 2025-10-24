@@ -7,13 +7,13 @@ import (
 	"crypto/subtle"
 	"errors"
 	"io"
-	"math/big"
+
+	"github.com/AeonDave/cryptonite-go/internal/x448"
 )
 
 const (
 	x448ScalarSize = 56
 	x448PointSize  = 56
-	x448A24        = 39081
 )
 
 var (
@@ -21,15 +21,6 @@ var (
 		var bp [x448PointSize]byte
 		bp[0] = 5
 		return bp
-	}()
-
-	x448Prime = func() *big.Int {
-		two := big.NewInt(2)
-		p := new(big.Int).Exp(two, big.NewInt(448), nil)
-		tmp := new(big.Int).Exp(two, big.NewInt(224), nil)
-		p.Sub(p, tmp)
-		p.Sub(p, big.NewInt(1))
-		return p
 	}()
 
 	x448Impl = &x448KeyExchange{}
@@ -138,6 +129,9 @@ func (k *x448PrivateKey) ECDH(peer PublicKey) ([]byte, error) {
 	if !ok {
 		return nil, errIncompatiblePublic
 	}
+	if x448.LowOrderPoint(&other.u) {
+		return nil, errX448LowOrder
+	}
 	var scalarCopy [x448ScalarSize]byte
 	copy(scalarCopy[:], k.scalar[:])
 	var result [x448PointSize]byte
@@ -197,113 +191,7 @@ func clampScalarX448(k []byte) {
 }
 
 func scalarMultX448(out *[x448PointSize]byte, scalar *[x448ScalarSize]byte, point *[x448PointSize]byte) {
-	var k [x448ScalarSize]byte
-	copy(k[:], scalar[:])
-	clampScalarX448(k[:])
-	x1 := decodeLittleEndian(point[:])
-	x2 := big.NewInt(1)
-	z2 := big.NewInt(0)
-	x3 := new(big.Int).Set(x1)
-	z3 := big.NewInt(1)
-	var swap uint64
-	for t := 447; t >= 0; t-- {
-		bit := (uint64(k[t/8]) >> (uint(t) & 7)) & 1
-		swap ^= bit
-		cswapBigInt(swap, x2, x3)
-		cswapBigInt(swap, z2, z3)
-		swap = bit
-
-		a := modAdd(x2, z2)
-		b := modSub(x2, z2)
-		aa := modSquare(a)
-		bb := modSquare(b)
-		e := modSub(aa, bb)
-		c := modAdd(x3, z3)
-		d := modSub(x3, z3)
-		da := modMul(d, a)
-		cb := modMul(c, b)
-		x3 = modSquare(modAdd(da, cb))
-		tmp := modSub(da, cb)
-		tmp = modSquare(tmp)
-		tmp = modMul(tmp, x1)
-		z3 = tmp
-		x2 = modMul(aa, bb)
-		z2 = modMul(e, modAdd(aa, modMulSmall(e, x448A24)))
-	}
-	cswapBigInt(swap, x2, x3)
-	cswapBigInt(swap, z2, z3)
-
-	inv := modInverse(z2)
-	x2 = modMul(x2, inv)
-	encodeLittleEndian(out[:], x2)
-}
-
-func cswapBigInt(swap uint64, x, y *big.Int) {
-	mask := new(big.Int).SetInt64(int64(-(int64(swap & 1))))
-	tmp := new(big.Int).Xor(x, y)
-	tmp.And(tmp, mask)
-	x.Xor(x, tmp)
-	y.Xor(y, tmp)
-}
-
-func modAdd(a, b *big.Int) *big.Int {
-	res := new(big.Int).Add(a, b)
-	res.Mod(res, x448Prime)
-	return res
-}
-
-func modSub(a, b *big.Int) *big.Int {
-	res := new(big.Int).Sub(a, b)
-	res.Mod(res, x448Prime)
-	return res
-}
-
-func modMul(a, b *big.Int) *big.Int {
-	res := new(big.Int).Mul(a, b)
-	res.Mod(res, x448Prime)
-	return res
-}
-
-func modSquare(a *big.Int) *big.Int {
-	return modMul(a, a)
-}
-
-func modMulSmall(a *big.Int, c int) *big.Int {
-	res := new(big.Int).Mul(a, big.NewInt(int64(c)))
-	res.Mod(res, x448Prime)
-	return res
-}
-
-func modInverse(a *big.Int) *big.Int {
-	if a.Sign() == 0 {
-		return new(big.Int)
-	}
-	inv := new(big.Int).ModInverse(a, x448Prime)
-	if inv == nil {
-		return new(big.Int)
-	}
-	return inv
-}
-
-func decodeLittleEndian(in []byte) *big.Int {
-	res := new(big.Int)
-	for i := len(in) - 1; i >= 0; i-- {
-		res.Lsh(res, 8)
-		res.Or(res, big.NewInt(int64(in[i])))
-	}
-	res.Mod(res, x448Prime)
-	return res
-}
-
-func encodeLittleEndian(out []byte, v *big.Int) {
-	value := new(big.Int).Mod(v, x448Prime)
-	bytes := value.Bytes()
-	for i := range out {
-		out[i] = 0
-	}
-	for i := 0; i < len(bytes) && i < len(out); i++ {
-		out[i] = bytes[len(bytes)-1-i]
-	}
+	x448.ScalarMult(out, scalar, point)
 }
 
 func constantTimeAllZero(b []byte) int {
