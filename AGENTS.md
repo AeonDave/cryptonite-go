@@ -4,22 +4,24 @@ This Agents.md file provides comprehensive guidance for AI agents working with t
 
 ## Project Structure for AI Agents Navigation
 
-- `/`: Root files include `go.mod` (specifies Go 1.22+ and module path), `README.md` (documentation and examples), `SECURITY.md` (policy), `CONTRIBUTING.md` (contributor guidelines), `LICENSE`, and `.gitignore`.
-- `/aead`: AEAD implementations, including algorithms like ASCON-128a, Xoodyak, ChaCha20-Poly1305, AES-GCM, etc.
+- `/`: Root files include `go.mod` (specifies Go 1.22+ and module path), `README.md` (documentation and examples), `SECURITY.md` (policy), `CONTRIBUTING.md` (contributor guidelines), `LICENSE`, `.gitignore`, and `benchmark.md` (benchmarking documentation).
+- `/aead`: AEAD implementations, including algorithms like ASCON-128a, ASCON-80pq, Xoodyak, ChaCha20-Poly1305, AES-GCM, AES-GCM-SIV, AES-SIV, Deoxys-II, Gift-COFB, Skinny-AEAD, XChaCha20-Poly1305, etc.
 - `/block`: Block ciphers, primarily AES-128 and AES-256 wrappers.
 - `/ecdh`: Elliptic Curve Diffie-Hellman for X25519, P-256, and P-384.
-- `/hash`: Hashing functions and interfaces, supporting SHA3, BLAKE2, Xoodyak, and SP 800-185 constructions.
+- `/hash`: Hashing functions and interfaces, supporting SHA3, BLAKE2, BLAKE3, Xoodyak, and SP 800-185 constructions (including TupleHash).
 - `/hpke`: Hybrid Public Key Encryption implementations.
 - `/kdf`: Key Derivation Functions including HKDF, PBKDF2, Argon2id, and scrypt.
 - `/kem`: Key Encapsulation Mechanisms (KEM) adapters, such as X25519 KEM.
-- `/mac`: Message Authentication Codes such as HMAC-SHA256 and Poly1305.
-- `/pq`: Post-quantum KEMs and signatures, including hybrid constructions.
+- `/mac`: Message Authentication Codes such as HMAC-SHA256, Poly1305, and KMAC.
+- `/pq`: Post-quantum KEMs and signatures, including hybrid constructions and envelope schemes.
 - `/sig`: Signature algorithms including Ed25519 and ECDSA P-256.
-- `/stream`: Stream ciphers like ChaCha20 and XChaCha20.
-- `/xof`: Extendable-Output Functions (XOF) like SHAKE, BLAKE2 XOF, and Xoodyak XOF.
+- `/stream`: Stream ciphers like ChaCha20, XChaCha20, and AES-CTR.
+- `/xof`: Extendable-Output Functions (XOF) like SHAKE, BLAKE2 XOF, Xoodyak XOF, and cSHAKE.
 - `/secret`: Helpers for secret material management, including symmetric keys, nonces, and counters.
-- `/internal`: Internal implementations and primitives shared across packages (e.g., BLAKE2b, ChaCha20, Keccak).
+- `/internal`: Internal implementations and primitives shared across packages (e.g., BLAKE2b, BLAKE2s, ChaCha20, Keccak, Poly1305, Xoodyak, Deoxys-II).
 - `/test`: Test suites with known-answer tests, Wycheproof vectors, and fuzzing harnesses. Each package has its own tests with /testdata test vectors.
+- `/docs`: Documentation files including ALGORITHMS.md, HPKE.md, INTEROP.md, NONCE_MANAGEMENT.md, PQ.md, and TESTING.md.
+- `/.github`: GitHub-related files (e.g., workflows, templates).
 
 
 ## Coding Conventions for AI Agents
@@ -82,8 +84,9 @@ When AI agents help create a PR, please ensure it:
 2. Links to relevant RFCs, standards (e.g., NIST, IETF), or issues.
 3. Ensures all tests pass, including race detection and coverage.
 4. Includes examples or updates to `README.md` for new features.
-5. Keeps PRs focused on a single algorithm or interface change.
-6. Validates interoperability with existing implementations.
+5. Updates documentation in `/docs` as needed.
+6. Keeps PRs focused on a single algorithm or interface change.
+7. Validates interoperability with existing implementations.
 
 ## Programmatic Checks for AI Agents
 
